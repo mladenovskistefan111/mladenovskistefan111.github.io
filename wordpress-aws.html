@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HA WordPress on AWS — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --red: #991B1B; --red-light: #FEF2F2; --red-border: #FECACA;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout.red { background: var(--red-light); border-color: var(--red); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); } .callout.amber .callout-label { color: var(--amber); } .callout.blue .callout-label { color: var(--accent); } .callout.red .callout-label { color: var(--red); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); } p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 200px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .code-block { background: #1E1E1E; border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .code-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7280; margin-bottom: 0.75rem; display: block; }
+  .code-block code { font-family: var(--mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.7; white-space: pre; display: block; }
+  .code-comment { color: #6B7280; } .code-key { color: #93C5FD; } .code-val { color: #86EFAC; } .code-str { color: #FDE68A; } .code-kw { color: #C4B5FD; }
+  .verdict-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .verdict-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .verdict-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; }
+  .verdict-table td:first-child { font-family: var(--mono); font-size: 13px; white-space: nowrap; width: 200px; }
+  .verdict-table td:last-child { color: var(--text-muted); }
+  .verdict-good td:first-child { color: var(--green); } .verdict-bad td:first-child { color: var(--red); }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Learning Projects</p>
+    <h1 class="project-title">HA WordPress on AWS — <em>Where it started</em></h1>
+    <p class="subtitle">My first AWS project. Two months into learning cloud, trying to land an internship and determined to build something real. It worked. It also had more gaps than I could see at the time.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Jul – Aug 2024</span></div>
+      <div class="meta-item"><span class="meta-label">Duration</span><span class="meta-value">~5 weeks to working site</span></div>
+      <div class="meta-item"><span class="meta-label">Context</span><span class="meta-value">Personal learning project</span></div>
+      <div class="meta-item"><span class="meta-label">AWS experience at time</span><span class="meta-value">~2 months</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Terraform</span><span class="tag">AWS VPC</span><span class="tag">EC2 + ASG</span><span class="tag">ALB</span>
+      <span class="tag">RDS MySQL</span><span class="tag">Secrets Manager</span><span class="tag">CloudWatch</span><span class="tag">SNS</span>
+      <span class="tag">IAM</span><span class="tag">S3 Remote State</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">5</span><span class="stat-label">Terraform modules — networking, compute, database, loadbalancing, cloudwatch</span></div>
+    <div class="stat-card"><span class="stat-number">2</span><span class="stat-label">Availability Zones, with subnets spanning both</span></div>
+    <div class="stat-card"><span class="stat-number">4<span style="font-size:1rem;font-weight:300;">wks</span></span><span class="stat-label">From zero AWS knowledge to working WordPress site</span></div>
+    <div class="stat-card"><span class="stat-number">✓</span><span class="stat-label">It deployed. The site loaded. WordPress worked.</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>The honest starting point</h2>
+    <p>This was my first real AWS project. I had been learning cloud for about two months — working through documentation, courses, and homelab experiments — and I wanted something concrete to show. The goal wasn't a polished production system. It was to prove to myself that I could take cloud concepts off the page and build something that actually ran.</p>
+    <p>The constraints were real: no budget to speak of, no experience to fall back on, and no AI tooling good enough at the time to paper over the gaps. Everything took longer than it should have. Some things I got right without fully understanding why. Others I got wrong without realising it.</p>
+    <div class="callout blue">
+      <p class="callout-label">Why it's on this portfolio</p>
+      <p>Not because it's impressive infrastructure — it isn't. It's here because it's the beginning of the thread. The Nextsense Kubernetes platform and the Billtrust SRE work didn't come from nowhere. This project, with all its gaps, is where the foundations were laid. Leaving it out would make the story look cleaner than it was.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — What was built</p>
+    <h2>The architecture</h2>
+    <p>A modular Terraform project that provisioned a WordPress site on AWS across two Availability Zones. Traffic flows through an Application Load Balancer in public subnets to an Auto Scaling Group of EC2 instances in private app subnets, which connect to a MySQL RDS instance in a separate private DB subnet layer. EC2 bootstrapping via a userdata script handled Apache, PHP, and WordPress installation automatically on every instance launch.</p>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>What it does</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>networking module</td><td>VPC, public/app/DB subnets across 2 AZs, IGW, NAT GW, route tables</td><td>Three-tier subnet design, one NAT Gateway (cost decision that became a gap)</td></tr>
+        <tr><td>loadbalancing module</td><td>ALB in public subnets, target group, HTTP listener, health checks</td><td>Health check path baked into userdata as <code style="font-family:var(--mono);font-size:12px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">/health/</code></td></tr>
+        <tr><td>compute module</td><td>Launch template, ASG (min 2 / max 2), IAM role + instance profile</td><td>Userdata installs Apache, PHP, WordPress, CloudWatch agent on every launch</td></tr>
+        <tr><td>database module</td><td>RDS MySQL 8.0 in private DB subnets, credentials via Secrets Manager</td><td>Multi-AZ enabled on the final deployment run</td></tr>
+        <tr><td>cloudwatch-alarms module</td><td>CPU, disk, memory alarms per instance — fires to SNS email on breach</td><td>Custom namespace for disk/memory since these aren't native EC2 metrics</td></tr>
+        <tr><td>S3 + DynamoDB backend</td><td>Remote state with server-side encryption and state locking</td><td>Provisioned manually before the rest — prerequisite for the backend config</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — What held up</p>
+    <h2>The things past-me got right</h2>
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Module separation</div><div class="highlight-item-desc">Networking, compute, database, loadbalancing, and cloudwatch-alarms are cleanly separated with explicit input/output contracts. This was intentional — I wanted it to look like real Terraform, not a single-file script. It worked.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Secrets Manager for DB credentials</div><div class="highlight-item-desc">Database credentials never appear in the Terraform code or state file. Provisioned via the AWS console, fetched at runtime via jsondecode(). No hardcoded passwords anywhere in the repo.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Remote state with locking</div><div class="highlight-item-desc">S3 backend with DynamoDB state locking and encryption enabled. This is non-negotiable in any real environment, and getting it right from the first project was the right instinct.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Custom CloudWatch metrics</div><div class="highlight-item-desc">Disk and memory aren't surfaced by CloudWatch by default — the agent config in userdata publishes them to a custom namespace. The alarm module then queries that namespace correctly.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Security group scoping</div><div class="highlight-item-desc">ALB and app instances are on separate security groups. App instances only accept traffic from the ALB SG, not from the internet directly. DB instances only accept traffic from the app SG.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Multi-AZ RDS</div><div class="highlight-item-desc">Disabled during development runs to save time and cost — enabled on the final deployment. The DB subnet group spans both AZs, so the infrastructure supported it cleanly when switched on.</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">04 — What didn't</p>
+    <h2>The gaps — seen clearly now</h2>
+    <table class="verdict-table">
+      <thead><tr><th>Gap</th><th>What it means in practice</th><th>What I'd do now</th></tr></thead>
+      <tbody>
+        <tr class="verdict-bad"><td>No HTTPS</td><td>All traffic between the user and the ALB is plaintext HTTP. Passwords, session cookies — all unencrypted in transit.</td><td>ACM certificate on the ALB, HTTPS listener on :443, HTTP → HTTPS redirect, HSTS headers.</td></tr>
+        <tr class="verdict-bad"><td>Single NAT Gateway</td><td>Both private app subnets route outbound traffic through one NAT Gateway in us-east-1a. If that AZ has issues, EC2 instances in us-east-1b lose internet access.</td><td>One NAT Gateway per AZ, or use VPC endpoints for AWS services to reduce NAT dependency entirely.</td></tr>
+        <tr class="verdict-bad"><td>ASG health check: EC2, not ELB</td><td>The ASG only replaces instances that are terminated or stopped at the hypervisor level. An instance where Apache has crashed but the VM is still running will never be replaced.</td><td>Set health_check_type = "ELB" so the ALB health check drives replacement.</td></tr>
+        <tr class="verdict-bad"><td>Open egress on app SG</td><td>The app security group allows all outbound traffic to any destination on any port. Any compromise of an instance gives full outbound network access.</td><td>Restrict egress to port 3306 → DB SG, port 443 → AWS services.</td></tr>
+        <tr class="verdict-bad"><td>No shared filesystem</td><td>WordPress uploads are stored locally on each EC2 instance. The two ASG instances have diverging filesystems immediately after any upload. This is a split-brain problem.</td><td>EFS mount shared across all instances, mounted at wp-content/uploads via userdata.</td></tr>
+        <tr class="verdict-bad"><td>Secrets Manager provisioned via UI</td><td>The secret is not in code — if this infrastructure were torn down and rebuilt, the secret would need to be recreated manually before terraform apply would succeed.</td><td>Provision the secret as an aws_secretsmanager_secret resource in Terraform, with value from a .tfvars file excluded from version control.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout amber">
+      <p class="callout-label">The one I'm most proud of catching — eventually</p>
+      <p>The shared filesystem gap is the most interesting one in retrospect. WordPress running across two instances with local storage isn't just slightly wrong — it's fundamentally broken for any site that accepts uploads. It worked fine for a static demo site with no real content, which is exactly why it never surfaced as a problem during this project. The absence of failure isn't the same as correctness.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — Reflection</p>
+    <h2>What this project actually was</h2>
+    <p>A proof of concept built by someone with two months of AWS experience, no budget, and a strong desire to learn by building something real. Measured against that — it succeeded. The infrastructure deployed, the site loaded, WordPress ran. The module structure was clean enough that adding a new module later (cloudwatch-alarms) slotted in without restructuring anything.</p>
+    <p>The most valuable thing this project taught me wasn't any specific AWS service. It was the discipline of thinking in modules from the start — separating concerns, making dependencies explicit through outputs, keeping variables configurable rather than hardcoded. That pattern scaled directly into the Terraform work at Nextsense, just at a very different level of complexity.</p>
+    <div class="callout green">
+      <p class="callout-label">What came next</p>
+      <p>This project wasn't the finish line — it was the starting point. Directly after, I took what I'd learned and pushed further: containerizing applications, writing Helm charts, standing up an EKS cluster on AWS, and building CI/CD pipelines with GitHub Actions.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/AWS-Infrastructure-with-Terraform" target="_blank">GitHub Repo</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>

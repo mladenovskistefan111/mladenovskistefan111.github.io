@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telekom MK — Infrastructure & Performance Engineering — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); } .callout.amber .callout-label { color: var(--amber); } .callout.blue .callout-label { color: var(--accent); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); } p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .chapter-break { margin: 4rem 0; display: flex; align-items: center; gap: 1.5rem; }
+  .chapter-break-line { flex: 1; border: none; border-top: 2px solid var(--border-strong); }
+  .chapter-break-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); white-space: nowrap; padding: 4px 12px; border: 1px solid var(--border-strong); border-radius: 3px; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 180px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .code-block { background: #1E1E1E; border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .code-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7280; margin-bottom: 0.75rem; display: block; }
+  .code-block code { font-family: var(--mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.7; white-space: pre; display: block; }
+  .code-comment { color: #6B7280; } .code-key { color: #93C5FD; } .code-val { color: #86EFAC; } .code-str { color: #FDE68A; } .code-kw { color: #C4B5FD; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .timeline { border-left: 2px solid var(--border); margin: 1.5rem 0; padding-left: 1.5rem; }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.98rem; top: 0.4rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .timeline-phase { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+  .timeline-title { font-size: 15px; font-weight: 500; margin-bottom: 0.25rem; }
+  .timeline-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Infrastructure &amp; Performance</p>
+    <h1 class="project-title">Telekom Web Shop — Infrastructure Automation <em>&amp; Performance Engineering</em></h1>
+    <p class="subtitle">A fully automated, zero-downtime deployment platform for a 14-server air-gapped telecoms environment — and the performance incident that followed go-live, the diagnosis, and the load testing platform built to prove the fix held.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Role</span><span class="meta-value">DevOps Engineer</span></div>
+      <div class="meta-item"><span class="meta-label">Client</span><span class="meta-value">Telekom MK (via Nextsense Ltd.)</span></div>
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Jun – Nov 2025</span></div>
+      <div class="meta-item"><span class="meta-label">Environment</span><span class="meta-value">14 servers, air-gapped datacenter</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Ansible</span><span class="tag">Nginx</span><span class="tag">Keepalived</span><span class="tag">MongoDB</span>
+      <span class="tag">Windows IIS</span><span class="tag">Blue-Green</span><span class="tag">Ansible Vault</span><span class="tag">WinRM</span>
+      <span class="tag">VRRP</span><span class="tag">k6</span><span class="tag">k6-operator</span><span class="tag">Kubernetes</span>
+      <span class="tag">InfluxDB</span><span class="tag">Grafana</span><span class="tag">MongoDB Profiler</span><span class="tag">Makefile</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">14</span><span class="stat-label">servers fully automated — Linux and Windows</span></div>
+    <div class="stat-card"><span class="stat-number">0</span><span class="stat-label">manual steps to deploy or publish</span></div>
+    <div class="stat-card"><span class="stat-number">10–15<span style="font-size:1rem;font-weight:300;">min</span></span><span class="stat-label">full deployment across all servers (was hours)</span></div>
+    <div class="stat-card"><span class="stat-number">10×</span><span class="stat-label">performance improvement under load after incident</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>Starting from nothing</h2>
+    <p>Telekom MK — North Macedonia's national telecoms operator — was launching a major version upgrade of their public web store, built on Nextsense's proprietary CMS. Their existing setup was two virtual machines, everything co-located, no reverse proxy, no HA, and a manual deployment process that took around 30 minutes per server. For the new version, they provisioned 14 servers across their datacenter: 4 web servers, 2 CMS servers, 2 file share servers, 3 Nginx proxies, and a 3-node MongoDB replica set.</p>
+    <p>I was brought in as the first hire specifically for this engagement. The brief was to own everything from the operating system configuration upward: consistency across all VMs, zero-downtime deployments, a blue-green promotion workflow for their CMS editorial team, and infrastructure reusable enough to be adapted for other clients. There were no existing playbooks, no internal runbooks, no prior Ansible usage at the company.</p>
+    <div class="callout blue">
+      <p class="callout-label">Constraint</p>
+      <p>All servers were completely air-gapped — Telekom's datacenter security policy prohibited internet access from the VMs. Every package, every dependency had to be carried in manually and installed offline via dpkg or local file copy. This affected every role I wrote.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — Architecture</p>
+    <h2>Blue-green deployment platform</h2>
+    <p>The infrastructure uses a blue-green model with two branches that alternate between PRODUCTION and STAGE roles. Public traffic flows through a VRRP-managed virtual IP to a pair of HA Nginx proxies, which route to whichever branch is currently live. CMS editors access the other branch via a dedicated internal proxy. A single <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">make publish</code> command swaps the roles, synchronizes the MongoDB databases and file shares, and exits maintenance mode — all orchestrated as a single multi-playbook workflow.</p>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>Approach</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Roles</td><td>5 reusable roles</td><td>common, nginx_proxy, keepalived, mongodb, iis_server — all offline-first, reused across multiple client engagements</td></tr>
+        <tr><td>Playbooks</td><td>Orchestrated workflows</td><td>deploy.yaml and publish.yaml each compose 6–9 sub-playbooks in a defined sequence, with shared locking and branch detection logic</td></tr>
+        <tr><td>Inventory</td><td>group_vars per host group</td><td>Separate defaults.yaml, vars.yaml, vault.yaml per group. Branch membership encoded directly in hosts.yaml</td></tr>
+        <tr><td>Secrets</td><td>Ansible Vault</td><td>All passwords, credentials, and certificate content encrypted at rest. Vault password file kept outside the repo.</td></tr>
+        <tr><td>Execution</td><td>Makefile + ssh-agent</td><td>make publish / make deploy / make branch_status — one command per operation</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — Engineering challenges</p>
+    <h2>The hard problems</h2>
+
+    <h3>Branch detection and cross-playbook variable propagation</h3>
+    <p>Knowing which branch is PRODUCTION at runtime — without hardcoding it — was central to every deployment and publish operation. The solution reads the active Nginx symlink in /etc/nginx/sites-enabled/ on the proxy servers. Both proxy clusters are checked and asserted to be on opposite branches — if they match, the playbook fails immediately before touching anything.</p>
+    <p>Because the publish workflow spans multiple imported playbooks, branch variables had to survive across playbook boundaries. set_stats with aggregate: true was the mechanism — it writes variables to Ansible's stats artifact, which persists across imported playbook boundaries in a way that set_fact does not.</p>
+
+    <h3>The publish race condition — and the fix</h3>
+    <p>When the publish workflow entered maintenance mode on the CMS proxy, it removed the current Nginx symlink and created a new one pointing at the target branch. The problem: between the moment the old symlink was removed and the cache directory deletion completed, a request would slip through to the newly empty cache path, partially repopulate it, and the playbook would crash trying to delete a directory that was actively being written to.</p>
+    <p>The fix was to give each branch its own cache directory — web_cache01 and web_cache02 — and delete the one belonging to the branch being deactivated, not the active one. The race condition is eliminated because the deleted directory is never the one being served from.</p>
+    <div class="callout amber">
+      <p class="callout-label">Discovered in production</p>
+      <p>This bug only appeared under real traffic load — it never surfaced during initial testing when the site wasn't yet public. Diagnosing it required understanding the exact sequence of Nginx cache writes relative to the maintenance mode switchover.</p>
+    </div>
+
+    <h3>The publish workflow — what make publish actually does</h3>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-phase">Step 01</div><div class="timeline-title">Connectivity and permissions verification</div><div class="timeline-desc">Pings all servers. Verifies sudo rights on Linux, Administrator rights on Windows, IIS service availability, MongoDB connectivity, and write access to all file shares. Fails fast on any issue before touching the running system.</div></div>
+      <div class="timeline-item"><div class="timeline-phase">Step 02–04</div><div class="timeline-title">Lock, branch detection, health checks</div><div class="timeline-desc">Creates lock files on all servers simultaneously. Reads active Nginx symlinks and asserts PROD and STAGE are on opposite branches. HTTP health check against all web servers. MongoDB replica set status verified — all members must be PRIMARY or SECONDARY.</div></div>
+      <div class="timeline-item"><div class="timeline-phase">Step 05</div><div class="timeline-title">Enter maintenance mode</div><div class="timeline-desc">IIS stopped on CMS servers. CMS proxy symlink removed and replaced with maintenance page. Main proxy symlinks switched to the target branch — public traffic now hits the new PROD. Nginx cache for the old branch cleared. Pre-warm GET requests fired against key URLs on the new branch.</div></div>
+      <div class="timeline-item"><div class="timeline-phase">Step 06–07</div><div class="timeline-title">Database and file share synchronization</div><div class="timeline-desc">PROD database backed up with mongodump. STAGE database dumped. PROD database dropped and restored from the STAGE dump. Application user permissions re-granted. Target share backed up as backup.zip. STAGE share directories robocopy'd to PROD with /MIR.</div></div>
+      <div class="timeline-item"><div class="timeline-phase">Step 08–09</div><div class="timeline-title">Exit maintenance mode and lock release</div><div class="timeline-desc">IIS restarted on CMS servers. CMS proxy maintenance symlink removed and replaced with target branch config. Nginx reloaded. Lock files removed from all servers. Completion summary printed showing which branch is now PROD and which is STAGE.</div></div>
+    </div>
+    <div class="callout green">
+      <p class="callout-label">Production usage</p>
+      <p>This workflow ran 3–5 times per business day once the system was live. The non-technical Telekom CMS team ran it daily in production for the duration of the engagement.</p>
+    </div>
+  </section>
+
+  <div class="chapter-break"><div class="chapter-break-line"></div><div class="chapter-break-label">After go-live</div><div class="chapter-break-line"></div></div>
+
+  <section class="section">
+    <p class="section-eyebrow">04 — Performance incident</p>
+    <h2>The system was live. Then real traffic arrived.</h2>
+    <p>The infrastructure automation was complete, the publish workflow was running daily, and the site had gone live on the new 14-server setup. Light early traffic was fine. When real production load arrived, the site degraded significantly under concurrent users.</p>
+    <p>What followed was three intensive days of debugging with the team: development lead, systems engineer, a software architect brought in specifically for the investigation, and me on infrastructure and the data layer. It was a classic multi-layer performance problem — several independent bottlenecks, each tolerable in isolation, compounding into something that couldn't survive real concurrent traffic.</p>
+
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Application-level bottlenecks</div><div class="highlight-item-desc">The software architect attached a tracer and identified several expensive operations repeating on every user request that were candidates for caching or restructuring.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Unindexed MongoDB queries</div><div class="highlight-item-desc">The MongoDB profiler surfaced several frequently-executed queries running as full collection scans. Under concurrent production sessions the effect compounded significantly.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">No response caching</div><div class="highlight-item-desc">Frequently requested content was hitting the full application stack on every request. Implemented at the Nginx proxy layer independently of the application timeline.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">System-level overhead</div><div class="highlight-item-desc">The systems engineer identified security scanning configuration on the Windows servers adding per-request overhead that was invisible during low-traffic testing.</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — Load testing platform</p>
+    <h2>Kubernetes-native load testing with k6-operator</h2>
+    <p>While the team applied fixes, I needed a way to quantify the improvement quickly. I provisioned k6 across available lab machines via a shell script and ran distributed tests pointing at the same InfluxDB endpoint. It wasn't polished — but it produced the numbers needed: before the fixes, around 100 concurrent users caused measurable degradation; after, 600 concurrent users at 10 req/s held without issue.</p>
+    <p>That prototype made the value obvious — if distributed load testing was useful once under pressure, it was worth building properly. The production version was built on a local Kubernetes lab cluster: k6-operator, InfluxDB, and Grafana all running inside Kubernetes, with a Makefile interface that made distributed load testing a single command.</p>
+
+    <div class="code-block">
+      <span class="code-label">Makefile — complete interface</span>
+      <code><span class="code-comment"># Install k6-operator, InfluxDB, and Grafana — all in-cluster, pre-configured</span>
+make install
+
+<span class="code-comment"># Run a distributed load test — file is required, everything else defaults to 1</span>
+make load <span class="code-key">file</span>=<span class="code-str">telekom-prod.js</span> <span class="code-key">pods</span>=<span class="code-val">3</span> <span class="code-key">vus</span>=<span class="code-val">200</span> <span class="code-key">duration</span>=<span class="code-val">10</span>
+
+<span class="code-comment"># Generates TestRun CRD → kubectl apply → streams pod logs live</span>
+<span class="code-comment"># All metrics appear in the pre-provisioned Grafana dashboard automatically</span></code>
+    </div>
+
+    <div class="callout green">
+      <p class="callout-label">Result</p>
+      <p>The site was fast, the team was relieved, and we had the numbers to back it up. Infrastructure automation that disappears into the background and just works is the actual goal.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111" target="_blank">GitHub</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>

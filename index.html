@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stefan Mladenovski — DevOps & Platform Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --border-strong: #C8C2B8;
+    --text: #1A1816;
+    --text-muted: #6B6560;
+    --text-faint: #9E9892;
+    --accent: #1D4ED8;
+    --accent-light: #EFF6FF;
+    --accent-muted: #93C5FD;
+    --green: #166534;
+    --green-light: #F0FDF4;
+    --green-border: #BBF7D0;
+    --amber: #92400E;
+    --amber-light: #FFFBEB;
+    --amber-border: #FDE68A;
+    --tag-bg: #EDE9E3;
+    --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 2rem 6rem;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 3rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-name {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-name em {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .hero-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 1.75rem;
+  }
+
+  .hero-bio {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 640px;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+  }
+
+  .hero-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .hero-link {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--accent-muted);
+    padding-bottom: 1px;
+    transition: border-color 0.15s;
+  }
+
+  .hero-link:hover { border-color: var(--accent); }
+
+  .hero-divider {
+    color: var(--border-strong);
+    font-size: 10px;
+  }
+
+  /* ── SKILLS STRIP ── */
+  .skills-strip {
+    margin-bottom: 3.5rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .skills-strip-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 1rem;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem 1.5rem;
+  }
+
+  .skill-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .skill-category {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .skill-values {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── CERTS STRIP ── */
+  .certs-strip {
+    margin-bottom: 3.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--green-light);
+    border: 1px solid var(--green-border);
+    border-radius: 8px;
+  }
+
+  .certs-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 0.75rem;
+  }
+
+  .certs-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .cert-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    background: var(--surface);
+    color: var(--green);
+    border-radius: 3px;
+    border: 1px solid var(--green-border);
+    white-space: nowrap;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin-bottom: 3rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  /* ── PROJECT CARDS ── */
+  .project-grid {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .project-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: background 0.12s;
+    position: relative;
+  }
+
+  .project-card:hover {
+    background: var(--accent-light);
+  }
+
+  .project-card:hover .card-arrow {
+    transform: translateX(3px);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.25;
+  }
+
+  .card-title em {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .card-arrow {
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: transform 0.15s;
+  }
+
+  .card-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0.9rem;
+  }
+
+  .card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .card-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .card-stat {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* work vs learning distinction */
+  .card-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-right: 8px;
+  }
+
+  .card-badge.professional {
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid var(--accent-muted);
+  }
+
+  .card-badge.learning {
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border: 1px solid var(--border);
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-link {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-link:hover { text-decoration: underline; }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 2rem 1.25rem 4rem; }
+    .card-bottom { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <header class="hero">
+    <p class="hero-eyebrow">Portfolio — DevOps &amp; Platform Engineering</p>
+    <h1 class="hero-name">Stefan Mladenovski</h1>
+    <p class="hero-title">DevOps &amp; Platform Engineer · Site Reliability Engineering · Skopje, N. Macedonia</p>
+    <p class="hero-bio">Platform Engineer specializing in building and operating production-grade infrastructure across government, telecommunications, and fintech SaaS environments. Delivered $100k+ in annual cost savings through observability optimization. Strong experience in Kubernetes, CI/CD, and observability — active in incident response and on-call operations.</p>
+    <div class="hero-links">
+      <a class="hero-link" href="https://github.com/mladenovskistefan111" target="_blank">GitHub</a>
+      <span class="hero-divider">·</span>
+      <a class="hero-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+      <span class="hero-divider">·</span>
+      <a class="hero-link" href="mailto:mladenovskistefan111@gmail.com">mladenovskistefan111@gmail.com</a>
+    </div>
+  </header>
+
+  <!-- ── SKILLS ── -->
+  <div class="skills-strip">
+    <p class="skills-strip-label">Areas of Expertise</p>
+    <div class="skills-grid">
+      <div class="skill-item">
+        <span class="skill-category">Cloud &amp; Infrastructure</span>
+        <span class="skill-values">AWS · Azure · Proxmox · Crossplane</span>
+      </div>
+      <div class="skill-item">
+        <span class="skill-category">Platform Engineering</span>
+        <span class="skill-values">Kubernetes · Cilium · Istio · Backstage</span>
+      </div>
+      <div class="skill-item">
+        <span class="skill-category">SRE &amp; Observability</span>
+        <span class="skill-values">Datadog · PagerDuty · OpenTelemetry · LGTM</span>
+      </div>
+      <div class="skill-item">
+        <span class="skill-category">IaC &amp; Automation</span>
+        <span class="skill-values">Terraform · Ansible · Bash</span>
+      </div>
+      <div class="skill-item">
+        <span class="skill-category">CI/CD &amp; GitOps</span>
+        <span class="skill-values">GitHub Actions · ArgoCD · Jenkins</span>
+      </div>
+      <div class="skill-item">
+        <span class="skill-category">Security</span>
+        <span class="skill-values">Trivy · SonarQube · Kyverno · ZAP</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CERTS ── -->
+  <div class="certs-strip">
+    <p class="certs-label">Golden Kubestronaut — Certifications</p>
+    <div class="certs-row">
+      <span class="cert-tag">AWS SAA</span>
+      <span class="cert-tag">AWS DevOps Pro</span>
+      <span class="cert-tag">AZ-104</span>
+      <span class="cert-tag">AZ-305</span>
+      <span class="cert-tag">AZ-400</span>
+      <span class="cert-tag">AZ-700</span>
+      <span class="cert-tag">Terraform Associate</span>
+      <span class="cert-tag">LFCS</span>
+      <span class="cert-tag">CKA</span>
+      <span class="cert-tag">CKAD</span>
+      <span class="cert-tag">CKS</span>
+      <span class="cert-tag">KCNA</span>
+      <span class="cert-tag">KCSA</span>
+      <span class="cert-tag">Kyverno CA</span>
+      <span class="cert-tag">Cilium CA</span>
+      <span class="cert-tag">Istio CA</span>
+      <span class="cert-tag">Prometheus CA</span>
+      <span class="cert-tag">OpenTelemetry CA</span>
+      <span class="cert-tag">CGOA</span>
+      <span class="cert-tag">CAPA</span>
+      <span class="cert-tag">CBA</span>
+      <span class="cert-tag">CNPE</span>
+      <span class="cert-tag">CNPA</span>
+    </div>
+  </div>
+
+  <!-- ── PROFESSIONAL WORK ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">Professional Work</span>
+      <h2>Production environments &amp; client engagements</h2>
+    </div>
+
+    <div class="project-grid">
+
+      <!-- Billtrust SRE -->
+      <a class="project-card" href="billtrust-sre.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge professional">SRE · Current</span>
+            <div class="card-title">Billtrust — <em>Site Reliability Engineering</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">IWConnect · Dec 2025 – Present · AWS · Azure · Multi-cloud</p>
+        <p class="card-desc">APM and RUM observability audit across payment processing infrastructure — identified $100k+ in annual savings, reduced trace noise by 80%, and eliminated monitoring blind spots. 24/7 PagerDuty on-call, Exchange Online automation for 700+ mailboxes, and AI-assisted alert remediation with n8n.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">Datadog APM</span>
+            <span class="card-tag">Datadog RUM</span>
+            <span class="card-tag">PagerDuty</span>
+            <span class="card-tag">OpenTelemetry</span>
+            <span class="card-tag">Rundeck</span>
+            <span class="card-tag">n8n</span>
+            <span class="card-tag">PowerShell</span>
+          </div>
+          <span class="card-stat">$100k+ saved annually</span>
+        </div>
+      </a>
+
+      <!-- Nextsense K8s Platform -->
+      <a class="project-card" href="nextsense-k8s-platform.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge professional">Platform Engineering</span>
+            <div class="card-title">Production Kubernetes Platform <em>on Bare Metal</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">Nextsense Ltd. · Jun – Nov 2025 · Talos 1.11.1 / Kubernetes 1.34.1</p>
+        <p class="card-desc">Fully automated, CNCF-conformant Kubernetes platform built solo on Proxmox — from VM provisioning to disaster recovery in under 30 minutes end to end. Zero manual steps after terraform apply. 400+ Sonobuoy conformance tests passed. Full DR validated at 18 minutes with zero data loss.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">Talos Linux</span>
+            <span class="card-tag">Cilium</span>
+            <span class="card-tag">Longhorn</span>
+            <span class="card-tag">Velero</span>
+            <span class="card-tag">Terraform</span>
+            <span class="card-tag">Ansible</span>
+            <span class="card-tag">Prometheus</span>
+          </div>
+          <span class="card-stat">~25 min zero to cluster</span>
+        </div>
+      </a>
+
+      <!-- Telekom WebStore -->
+      <a class="project-card" href="nextsense-ansible-k6.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge professional">Infrastructure · Performance</span>
+            <div class="card-title">Telekom Web Shop — <em>Infrastructure Automation &amp; Performance Engineering</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">Nextsense Ltd. · Jun – Nov 2025 · 14 servers · air-gapped datacenter</p>
+        <p class="card-desc">Fully automated blue-green deployment platform for a 14-server air-gapped telecoms environment — zero manual steps, 10–15 minute deployments replacing hours of manual work. Followed by a production performance incident diagnosis and a Kubernetes-native load testing platform that proved a 10× improvement.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">Ansible</span>
+            <span class="card-tag">Nginx</span>
+            <span class="card-tag">Keepalived</span>
+            <span class="card-tag">MongoDB</span>
+            <span class="card-tag">k6</span>
+            <span class="card-tag">k6-operator</span>
+            <span class="card-tag">Grafana</span>
+          </div>
+          <span class="card-stat">10× perf improvement</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── LEARNING PROJECTS ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">Learning Projects</span>
+      <h2>Self-directed study &amp; personal infrastructure</h2>
+    </div>
+
+    <div class="project-grid">
+
+      <!-- WordPress AWS -->
+      <a class="project-card" href="wordpress-aws.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge learning">AWS · Terraform</span>
+            <div class="card-title">HA WordPress on AWS — <em>Where it started</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">Personal project · Jul – Aug 2024 · ~2 months AWS experience at the time</p>
+        <p class="card-desc">First AWS project — a modular Terraform deployment of WordPress across two availability zones, with an ALB, Auto Scaling Group, RDS MySQL, Secrets Manager, and CloudWatch alarms. Documented honestly, including all the gaps visible in hindsight.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">Terraform</span>
+            <span class="card-tag">EC2 + ASG</span>
+            <span class="card-tag">ALB</span>
+            <span class="card-tag">RDS MySQL</span>
+            <span class="card-tag">Secrets Manager</span>
+            <span class="card-tag">CloudWatch</span>
+          </div>
+          <span class="card-stat">5 Terraform modules</span>
+        </div>
+      </a>
+
+      <!-- EKS Bookshop -->
+      <a class="project-card" href="eks-bookshop.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge learning">Kubernetes · AWS</span>
+            <div class="card-title">Containerized Bookshop — <em>EKS, Helm &amp; CI/CD on AWS</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">Personal project · Sept – Oct 2024 · ~6 weeks · Zero Kubernetes experience going in</p>
+        <p class="card-desc">First Kubernetes project — containerizing an existing bookshop, deploying on EKS with Helm, and wiring two decoupled CI/CD pipelines. Includes honest gap analysis: what worked, what didn't, and what came next.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">EKS</span>
+            <span class="card-tag">Helm</span>
+            <span class="card-tag">Terraform</span>
+            <span class="card-tag">GitHub Actions</span>
+            <span class="card-tag">RDS PostgreSQL</span>
+            <span class="card-tag">Docker</span>
+          </div>
+          <span class="card-stat">2 decoupled pipelines</span>
+        </div>
+      </a>
+
+
+      <!-- Local K8s Observability -->
+      <a class="project-card" href="local-k8s-observability.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge learning">Kubernetes · Observability</span>
+            <div class="card-title">Bookshop — <em>Local Kubernetes, Observability &amp; CI/CD</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">Personal project · Dec 2024 – Jan 2025 · Minikube</p>
+        <p class="card-desc">The bookshop application redeployed locally with a full monitoring stack — Prometheus, Grafana, PostgreSQL Exporter, ArgoCD for GitOps, Nginx ingress done correctly, semantic versioning, and Jenkins vs GitHub Actions compared side by side.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">Minikube</span>
+            <span class="card-tag">Helm</span>
+            <span class="card-tag">Prometheus</span>
+            <span class="card-tag">Grafana</span>
+            <span class="card-tag">ArgoCD</span>
+            <span class="card-tag">Jenkins</span>
+            <span class="card-tag">Nginx Ingress</span>
+          </div>
+          <span class="card-stat">6 Helm charts from scratch</span>
+        </div>
+      </a>
+
+      <!-- Reflective App -->
+      <a class="project-card" href="reflective-app.html">
+        <div class="card-top">
+          <div>
+            <span class="card-badge learning">Full-Stack · OpenTelemetry</span>
+            <div class="card-title">Reflective — <em>Microservices, OpenTelemetry &amp; Full-Stack TypeScript</em></div>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <p class="card-meta">Personal project · Apr – Jun 2025 · TypeScript · Node.js · React</p>
+        <p class="card-desc">A goal-tracking application built from scratch — four services, two databases, a full observability pipeline (Jaeger, Prometheus, Grafana), and unit and integration tests — to understand software development from the inside and instrument OpenTelemetry from the code level.</p>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag">TypeScript</span>
+            <span class="card-tag">OpenTelemetry</span>
+            <span class="card-tag">Jaeger</span>
+            <span class="card-tag">Prisma</span>
+            <span class="card-tag">PostgreSQL</span>
+            <span class="card-tag">Jest</span>
+            <span class="card-tag">Docker Compose</span>
+          </div>
+          <span class="card-stat">3 telemetry signals</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="https://github.com/mladenovskistefan111" target="_blank">GitHub</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-mladenovski-0bb756232/" target="_blank">LinkedIn</a>
+      <a class="footer-link" href="mailto:mladenovskistefan111@gmail.com">Email</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — Skopje, N. Macedonia</p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reflective — Microservices, OpenTelemetry & Full-Stack TypeScript — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --red: #991B1B; --red-light: #FEF2F2; --red-border: #FECACA;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout.red { background: var(--red-light); border-color: var(--red); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); } .callout.amber .callout-label { color: var(--amber); } .callout.blue .callout-label { color: var(--accent); } .callout.red .callout-label { color: var(--red); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); } p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 200px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .code-block { background: #1E1E1E; border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .code-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7280; margin-bottom: 0.75rem; display: block; }
+  .code-block code { font-family: var(--mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.7; white-space: pre; display: block; }
+  .code-comment { color: #6B7280; } .code-key { color: #93C5FD; } .code-val { color: #86EFAC; } .code-str { color: #FDE68A; } .code-kw { color: #C4B5FD; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Learning Projects</p>
+    <h1 class="project-title">Reflective — <em>Microservices, OpenTelemetry &amp; Full-Stack TypeScript</em></h1>
+    <p class="subtitle">A goal-tracking application built from scratch in TypeScript — four services, two databases, a full observability pipeline, and unit and integration tests — to understand what software development actually looks like from the inside.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Apr – Jun 2025</span></div>
+      <div class="meta-item"><span class="meta-label">Context</span><span class="meta-value">Personal learning project</span></div>
+      <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">TypeScript · Node.js · React</span></div>
+      <div class="meta-item"><span class="meta-label">Interrupted by</span><span class="meta-value">Nextsense job offer</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">TypeScript</span><span class="tag">Node.js</span><span class="tag">React</span><span class="tag">OpenTelemetry</span>
+      <span class="tag">Jaeger</span><span class="tag">Prometheus</span><span class="tag">Grafana</span><span class="tag">Docker Compose</span>
+      <span class="tag">Prisma</span><span class="tag">PostgreSQL</span><span class="tag">JWT</span><span class="tag">Jest</span><span class="tag">Helm</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">4</span><span class="stat-label">Services — frontend, API gateway, auth, goals — each independently deployable</span></div>
+    <div class="stat-card"><span class="stat-number">2</span><span class="stat-label">Databases — one per service, auth and goals fully isolated</span></div>
+    <div class="stat-card"><span class="stat-number">3</span><span class="stat-label">Telemetry signals — traces to Jaeger, metrics to Prometheus, logs to collector</span></div>
+    <div class="stat-card"><span class="stat-number">3</span><span class="stat-label">Test layers — unit, integration, and middleware tests on the auth service</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>Why build your own application</h2>
+    <p>Every project up to this point used someone else's code — the bookshop application was containerized, deployed, and operated, but never written. That created a specific blind spot: the infrastructure work was solid, but the developer's perspective was missing. What does it actually feel like to build a service? Where do the pain points come from? What does good instrumentation look like from inside the code, not just from a dashboard?</p>
+    <p>The answer was to build something from scratch. Not a tutorial clone — a real application with authentication, business logic, a proper database schema, tests, and observability wired through every layer. The goal tracker was the vehicle: simple enough to build quickly, complex enough to be interesting, with auth and goals as naturally separate bounded contexts that justified the microservice split.</p>
+    <div class="callout blue">
+      <p class="callout-label">The real goal</p>
+      <p>Understanding developers better. The infrastructure work on real projects requires communicating with development teams, understanding their deployment constraints, and debugging their applications under load. Building a full-stack application yourself — writing the code, the tests, the Dockerfiles, and the observability — changes what you see when you look at someone else's system.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — Architecture</p>
+    <h2>Four services, two databases, one collector</h2>
+    <table class="tech-table">
+      <thead><tr><th>Service</th><th>Responsibility</th><th>Key details</th></tr></thead>
+      <tbody>
+        <tr><td>React frontend</td><td>Login, register, dashboard — goal CRUD via API Gateway</td><td>Vite + TypeScript. Talks to the API gateway only — no direct service calls.</td></tr>
+        <tr><td>API Gateway</td><td>Single entry point. Routes /api/auth and /api/goals to the correct service. Validates JWT on goal routes.</td><td>Helmet, CORS, error middleware. Auth routes are public; goal routes require a valid token.</td></tr>
+        <tr><td>Auth service</td><td>User registration and login, JWT access and refresh token lifecycle</td><td>Prisma + PostgreSQL. Users and refresh tokens in separate tables. Full unit and integration test suite via Jest.</td></tr>
+        <tr><td>Goal service</td><td>CRUD operations on goals, scoped by userId extracted from the JWT</td><td>Separate PostgreSQL database from auth. Goals indexed by userId. Prisma migrations run at startup.</td></tr>
+        <tr><td>OTel Collector</td><td>Receives OTLP/HTTP from all services, routes signals to backends</td><td>Batch processor, memory limiter. Traces → Jaeger. Metrics → Prometheus scrape endpoint. Logs → console.</td></tr>
+        <tr><td>Jaeger</td><td>Distributed trace visualisation</td><td>All-in-one image. Receives traces from the collector via gRPC on port 14250. UI on port 16686.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — OpenTelemetry instrumentation</p>
+    <h2>Signals from inside the code</h2>
+    <p>Each service initialises the OpenTelemetry Node SDK at startup, before any application code runs. The SDK is configured with a resource that identifies the service by name, version, instance ID, and environment. Three exporters are wired: OTLP/HTTP for traces, OTLP/HTTP for metrics, and OTLP/HTTP for logs, all pointing at the collector.</p>
+    <p>Auto-instrumentation handles the boilerplate — Express routes, HTTP client calls, and Pino log records all generate spans and are correlated automatically. On top of that, each service defines its own domain-specific metrics: the auth service counts authentication attempts, successes, and failures with outcome attributes; the API gateway tracks request counts and durations per route.</p>
+
+    <div class="code-block">
+      <span class="code-label">auth-service/observability.ts — domain metrics and database spans</span>
+      <code><span class="code-comment">// Domain counters — auth outcomes tracked with type + success attributes</span>
+<span class="code-kw">const</span> authAttempts = meter.createCounter(<span class="code-str">'auth_attempts_total'</span>);
+<span class="code-kw">const</span> authSuccesses = meter.createCounter(<span class="code-str">'auth_success_total'</span>);
+<span class="code-kw">const</span> authFailures = meter.createCounter(<span class="code-str">'auth_failures_total'</span>);
+
+<span class="code-comment">// Database operation wrapper — creates a span, records duration, handles errors</span>
+<span class="code-kw">export const</span> withDatabaseSpan = <span class="code-kw">async</span> &lt;T&gt;(
+  name: string,
+  operation: () =&gt; Promise&lt;T&gt;,
+  attributes?: Record&lt;string, string | number | boolean&gt;
+): Promise&lt;T&gt; =&gt; {
+  <span class="code-kw">const</span> span = tracer.startSpan(name, {
+    kind: SpanKind.CLIENT,
+    attributes: { <span class="code-str">'db.system'</span>: <span class="code-str">'postgresql'</span>, ...attributes },
+  });
+  <span class="code-kw">try</span> {
+    <span class="code-kw">const</span> result = <span class="code-kw">await</span> operation();
+    span.setStatus({ code: SpanStatusCode.OK });
+    <span class="code-kw">return</span> result;
+  } <span class="code-kw">catch</span> (error) {
+    span.recordException(error <span class="code-kw">as</span> Error);
+    span.setStatus({ code: SpanStatusCode.ERROR });
+    <span class="code-kw">throw</span> error;
+  } <span class="code-kw">finally</span> {
+    span.end();
+  }
+};</code>
+    </div>
+
+    <div class="callout blue">
+      <p class="callout-label">What this looks like in Jaeger</p>
+      <p>A single user request to create a goal produces a trace that starts at the API gateway, shows the JWT validation middleware as a child span, then the proxied HTTP call to the goal service, and finally the Prisma database operation as a CLIENT span with db.system=postgresql and duration attached. The full request lifecycle — across two services and a database — visible in a single waterfall view.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">04 — Testing</p>
+    <h2>Why the auth service has tests</h2>
+    <p>The auth service is the only service with a test suite — unit tests covering utilities, middleware, models, and error handling; integration tests covering the full request lifecycle through the Express app. Writing tests was part of the goal of understanding how developers work.</p>
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Unit tests</div><div class="highlight-item-desc">JWT utilities, password hashing, error classes, catchAsync wrapper, validation schemas, logger — each tested in isolation. Fast, no database dependency.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Middleware tests</div><div class="highlight-item-desc">Auth middleware and error middleware tested with mocked request/response objects. Verifies that invalid tokens are rejected and errors are formatted consistently.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Integration tests</div><div class="highlight-item-desc">Full HTTP request lifecycle through the Express app — register, login, token refresh. Tests the entire stack from route to controller to service to database.</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — What was left unfinished</p>
+    <h2>Where it stopped</h2>
+    <p>The Nextsense job came before the project was complete. What was working: all four services running via Docker Compose, the full observability pipeline — traces in Jaeger, metrics in Prometheus, Grafana dashboards — and the auth service test suite. What wasn't finished: the Helm charts exist but weren't fully tuned, there was no CI/CD pipeline wiring the tests to image builds, and Loki for log storage was planned but never added.</p>
+    <div class="callout amber">
+      <p class="callout-label">Honest assessment</p>
+      <p>This is the most technically ambitious of the learning projects — full-stack TypeScript, microservice boundaries, database-per-service, distributed tracing, domain metrics, integration tests. It's also the most incomplete. The foundation is solid and the observability work is real, but the CI/CD and Kubernetes deployment goals didn't land before the job started. Given the choice between finishing a personal project and giving full attention to a production environment at Nextsense, the right call was obvious.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">06 — Reflection</p>
+    <h2>What building the code actually changed</h2>
+    <p>The most valuable outcome of this project wasn't the code — it was the shift in perspective. Writing a service from scratch, hitting a bug in middleware ordering, debugging a Prisma migration that ran in the wrong environment, trying to figure out why a span wasn't showing up in Jaeger — these are the problems developers deal with daily. Having worked through them personally changes how you read an application's telemetry, how you interpret a slow database span, and how you talk to a development team about what their service is actually doing.</p>
+    <p>OpenTelemetry instrumented from the inside looks different from OpenTelemetry configured from the outside. Writing the withDatabaseSpan wrapper, deciding which attributes to attach to which spans, figuring out why correlation IDs weren't propagating through the Pino logger — that's a different kind of understanding than deploying a pre-instrumented application and watching the dashboards.</p>
+    <div class="callout green">
+      <p class="callout-label">What came next</p>
+      <p>The Nextsense job. Real production infrastructure, real clients. The observability work here fed directly into the Datadog APM and RUM work at Billtrust, where the same concepts — trace sampling, metric cardinality, log correlation — appeared at a significantly larger scale.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/reflective-frontend" target="_blank">Frontend</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/reflective-api-gateway" target="_blank">Api Gateway</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/reflective-auth-service" target="_blank">Auth Service</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/reflective-goal-service" target="_blank">Goal Service</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>

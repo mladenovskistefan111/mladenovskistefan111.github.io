@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookshop — Local Kubernetes, Observability & CI/CD — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); } .callout.amber .callout-label { color: var(--amber); } .callout.blue .callout-label { color: var(--accent); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); } p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 200px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Learning Projects</p>
+    <h1 class="project-title">Bookshop — <em>Local Kubernetes, Observability &amp; CI/CD</em></h1>
+    <p class="subtitle">The same bookshop application, deployed locally on Minikube — but this time with a monitoring stack, a proper ingress setup, GitOps via ArgoCD, and a Jenkins CI pipeline running in Docker to compare against GitHub Actions.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Dec 2024 – Jan 2025</span></div>
+      <div class="meta-item"><span class="meta-label">Duration</span><span class="meta-value">~6 weeks</span></div>
+      <div class="meta-item"><span class="meta-label">Context</span><span class="meta-value">Personal learning project</span></div>
+      <div class="meta-item"><span class="meta-label">Environment</span><span class="meta-value">Minikube · local machine</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Minikube</span><span class="tag">Kubernetes</span><span class="tag">Helm</span><span class="tag">Prometheus</span>
+      <span class="tag">Grafana</span><span class="tag">PostgreSQL Exporter</span><span class="tag">ArgoCD</span><span class="tag">Jenkins</span>
+      <span class="tag">GitHub Actions</span><span class="tag">Ngrok</span><span class="tag">Nginx Ingress</span><span class="tag">Semantic Versioning</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">6</span><span class="stat-label">Helm charts — app, monitoring stack, all written from scratch</span></div>
+    <div class="stat-card"><span class="stat-number">2</span><span class="stat-label">Kubernetes namespaces — app-dev and monitoring, cleanly separated</span></div>
+    <div class="stat-card"><span class="stat-number">95<span style="font-size:1rem;font-weight:300;">%</span></span><span class="stat-label">RAM usage on a single laptop running the full stack</span></div>
+    <div class="stat-card"><span class="stat-number">2</span><span class="stat-label">CI systems compared — Jenkins and GitHub Actions, side by side</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>The same application, done properly</h2>
+    <p>The EKS project got the application running on Kubernetes — but it had no observability, no real understanding of how the pieces fit together at the cluster level, and a frontend/backend networking problem that was solved by brute force rather than by understanding. This project was the deliberate response to all of that.</p>
+    <p>The goal wasn't to build something new. It was to take the same bookshop application — the same Spring Boot backend, the same React frontend — deploy it locally on Minikube, and this time instrument it properly. Prometheus scraping application and database metrics, Grafana for visualization, ArgoCD for GitOps-style CD, and Jenkins running in Docker to understand what CI looked like before GitHub Actions.</p>
+    <p>Local rather than cloud for a simple reason: no cost, no apply/destroy cycle, unlimited iteration. The constraint this time wasn't budget — it was a laptop running at 95% RAM with Minikube, Jenkins, and everything else competing for resources.</p>
+    <div class="callout blue">
+      <p class="callout-label">What this project was really about</p>
+      <p>Building the mental model. How does a metrics pipeline actually work — from application instrumentation to scrape target to time-series data to dashboard panel? How does ArgoCD watch a Git repo and reconcile the cluster state against it? How does Jenkins compare to GitHub Actions as a CI tool? These were the questions. The bookshop was just the vehicle.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — Architecture</p>
+    <h2>What was running</h2>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>What it does</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Nginx Ingress</td><td>Routes all external traffic by hostname — react.local, springboot.local, prometheus.local, grafana.local</td><td>Installed via Helm. External IP exposed via minikube tunnel, mapped in /etc/hosts</td></tr>
+        <tr><td>React + Spring Boot</td><td>Frontend and backend in namespace app-dev, ClusterIP services, ingress routes</td><td>Frontend talks to springboot.local/api — correctly resolved via the browser, not cluster DNS</td></tr>
+        <tr><td>PostgreSQL</td><td>StatefulSet with PVC, SQL data seeded via init ConfigMap at first startup</td><td>No Bastion, no SSH — init SQL bundled in the Helm chart, mounted at /docker-entrypoint-initdb.d</td></tr>
+        <tr><td>Prometheus</td><td>Scrapes Spring Boot actuator and PostgreSQL Exporter every 15s</td><td>Two scrape targets configured via ConfigMap. Cross-namespace DNS used to reach app-dev services from monitoring namespace</td></tr>
+        <tr><td>PostgreSQL Exporter</td><td>Exposes database metrics to Prometheus on port 9187</td><td>stat_activity and stat_database collectors enabled. Connects to PostgreSQL via full cluster DNS name</td></tr>
+        <tr><td>Grafana</td><td>Prometheus datasource auto-provisioned via ConfigMap. Dashboards built manually in the UI.</td><td>The provisioned datasource wires Prometheus automatically on startup — no manual datasource configuration needed</td></tr>
+        <tr><td>ArgoCD</td><td>Watches the infra repo, syncs Helm chart state to the cluster</td><td>Installed via manifests. Applications added manually through the ArgoCD UI pointing at the repo</td></tr>
+        <tr><td>Jenkins</td><td>Runs in Docker outside the cluster. Triggered via GitHub webhook through Ngrok.</td><td>Pulls code, runs Maven build (Spring Boot) or npm build (React), builds Docker image, pushes to Docker Hub with semantic version tag</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — What improved</p>
+    <h2>Genuine steps forward from the EKS project</h2>
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Ingress done correctly</div><div class="highlight-item-desc">The two-LoadBalancer workaround from the EKS project is gone. All services are ClusterIP. A single Nginx Ingress Controller routes by hostname. The frontend reaches the backend via springboot.local/api — a publicly resolvable URL the browser can actually use.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Database seeding via Helm</div><div class="highlight-item-desc">The SQL dump is bundled inside the Helm chart as a ConfigMap, mounted at PostgreSQL's init directory. On first startup, the database seeds itself. No Bastion host, no SSH tunnel, no CI pipeline step to sequence carefully.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">PostgreSQL as a StatefulSet</div><div class="highlight-item-desc">Correct resource type for a database — stable network identity, ordered startup, persistent volume claim. The EKS project used a managed RDS so this distinction didn't come up. Running it in-cluster made it visible.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Semantic versioning</div><div class="highlight-item-desc">GitHub Actions workflow reads the commit message, bumps the version tag (major/minor/patch), pushes the tag. Jenkins picks up the latest tag and builds the Docker image with it. No more :latest only — every build has a traceable version.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Grafana datasource provisioned automatically</div><div class="highlight-item-desc">The Prometheus datasource is defined in a ConfigMap and mounted into Grafana's provisioning directory. On startup, Grafana picks it up automatically — no manual datasource wiring through the UI.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Cross-namespace service communication</div><div class="highlight-item-desc">Prometheus in the monitoring namespace scrapes Spring Boot in app-dev using the full cluster DNS name. Same pattern for the PostgreSQL Exporter reaching the database. Understanding how Kubernetes DNS works across namespaces was new here.</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">04 — The observability pipeline</p>
+    <h2>How metrics actually flow</h2>
+    <p>The Spring Boot backend exposes metrics via the Actuator's /actuator/prometheus endpoint — JVM heap usage, HTTP request rates, response times, thread counts, and more, all in Prometheus exposition format out of the box. The PostgreSQL Exporter connects to the database and translates internal PostgreSQL statistics into the same format.</p>
+    <p>Prometheus scrapes both targets every 15 seconds and stores the time-series data locally. Grafana connects to Prometheus as a datasource and provides the query and visualization layer. Building dashboards manually in the Grafana UI — writing PromQL queries, choosing panel types, arranging layouts — was the primary way of learning what the data actually meant and how to ask useful questions of it.</p>
+    <div class="callout blue">
+      <p class="callout-label">The goal was the mental model, not the dashboards</p>
+      <p>The dashboards themselves weren't the point. Understanding the full chain — application exposes metrics, scraper collects them on a schedule, time-series database stores them, query language retrieves them, visualization renders them — was the point. This is the same pipeline that underpins every production observability stack, just running locally on one laptop.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — Jenkins vs GitHub Actions</p>
+    <h2>The CI comparison</h2>
+    <p>Running both CI systems side by side on the same codebase was one of the explicit goals of this project. The setup for Jenkins was: pull the official Docker image, run it locally on port 8081, install the Maven, Docker, and Pipeline plugins manually, expose port 8081 via Ngrok to get a public URL for GitHub's webhook, configure the webhook in the GitHub repo, write a Jenkinsfile. The setup for GitHub Actions was: create a YAML file in .github/workflows/.</p>
+    <p>Both worked. The conclusion after six weeks of using both was unambiguous: GitHub Actions is significantly easier to use for most CI tasks. The plugin ecosystem that made Jenkins powerful in its era is also its main liability — every capability requires finding, installing, and maintaining the right plugin, and the configuration UI has not aged well.</p>
+    <div class="callout amber">
+      <p class="callout-label">Where Jenkins still makes sense</p>
+      <p>Jenkins has a place in environments with complex, long-standing pipelines that predate GitHub Actions, or where the CI system needs to run in an air-gapped or self-hosted environment with no cloud dependency. For a fresh project in 2024 on GitHub, it's hard to justify the operational overhead. That said — understanding how Jenkins works, what plugins do, and why it was the industry standard for a decade is worth the time it took to run it.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">06 — Reflection</p>
+    <h2>What this project actually was</h2>
+    <p>Six weeks of filling in gaps. The EKS project left specific open questions — no observability, no understanding of ingress, no GitOps, only GitHub Actions for CI. This project answered all of them, deliberately, using the same application as a consistent baseline so the infrastructure and tooling changes were the only variables.</p>
+    <p>The most valuable outcome wasn't any individual tool. It was understanding how a modern application platform hangs together: application code instrumented and exposing metrics, a scraper collecting them, a time-series database storing them, a visualization layer querying them, a GitOps tool reconciling declared state against actual cluster state, a CI pipeline building and tagging images that the cluster pulls. Each piece is simple in isolation. Understanding how they connect is what takes time.</p>
+    <div class="callout green">
+      <p class="callout-label">What came next</p>
+      <p>The local project established the foundations. What followed was taking everything learned — Kubernetes, Helm, CI/CD, observability — into real production environments at Nextsense and then Billtrust, where the stakes, the scale, and the complexity were all significantly higher.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/BookShop-Monitoring" target="_blank">Infra / Helm Repo</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/app-react" target="_blank">React Repo</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/app-springboot" target="_blank">Spring Boot Repo</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>

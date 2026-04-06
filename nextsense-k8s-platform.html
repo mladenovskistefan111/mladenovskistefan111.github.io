@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Kubernetes Platform on Proxmox — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 600px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.blue .callout-label { color: var(--accent); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); }
+  p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 180px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .code-block { background: #1E1E1E; border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .code-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7280; margin-bottom: 0.75rem; display: block; }
+  .code-block code { font-family: var(--mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.7; white-space: pre; display: block; }
+  .code-comment { color: #6B7280; } .code-key { color: #93C5FD; } .code-val { color: #86EFAC; } .code-str { color: #FDE68A; } .code-kw { color: #C4B5FD; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .timeline { border-left: 2px solid var(--border); margin: 1.5rem 0; padding-left: 1.5rem; }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.98rem; top: 0.4rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .timeline-phase { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+  .timeline-title { font-size: 15px; font-weight: 500; margin-bottom: 0.25rem; }
+  .timeline-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Infrastructure</p>
+    <h1 class="project-title">Production Kubernetes Platform <em>on Bare Metal</em></h1>
+    <p class="subtitle">A fully automated, CNCF-conformant Kubernetes platform built solo on Proxmox — from VM provisioning to disaster recovery, in under 30 minutes end to end.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Role</span><span class="meta-value">DevOps Engineer</span></div>
+      <div class="meta-item"><span class="meta-label">Company</span><span class="meta-value">Nextsense Ltd.</span></div>
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Jun – Nov 2025</span></div>
+      <div class="meta-item"><span class="meta-label">Cluster</span><span class="meta-value">Talos 1.11.1 / Kubernetes 1.34.1</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Talos Linux</span><span class="tag">Kubernetes</span><span class="tag">Terraform</span><span class="tag">Ansible</span>
+      <span class="tag">Cilium</span><span class="tag">Longhorn</span><span class="tag">Velero</span><span class="tag">Prometheus</span>
+      <span class="tag">Proxmox</span><span class="tag">eBPF</span><span class="tag">Sonobuoy</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">~25<span style="font-size:1rem;font-weight:300;">min</span></span><span class="stat-label">Zero to production-ready cluster</span></div>
+    <div class="stat-card"><span class="stat-number">18<span style="font-size:1rem;font-weight:300;">min</span></span><span class="stat-label">Full DR recovery, zero data loss</span></div>
+    <div class="stat-card"><span class="stat-number">400<span style="font-size:1rem;font-weight:300;">+</span></span><span class="stat-label">Sonobuoy conformance tests passed</span></div>
+    <div class="stat-card"><span class="stat-number">0</span><span class="stat-label">Manual steps after terraform apply</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>The problem this solved</h2>
+    <p>Nextsense had just completed a large infrastructure migration — moving a 10-node Proxmox cluster (replacing Hyper-V, freeing up licensing costs) that hosted 100+ VMs across their datacenter. With that foundation in place, the business had a new requirement: their applications were being containerized, multiple clients needed isolated environments, and the team had no Kubernetes knowledge, no monitoring, and no repeatable way to provision clusters on demand.</p>
+    <p>I was brought in as the sole DevOps engineer responsible for designing, building, and delivering this platform from scratch. The brief was straightforward in scope but open in technical direction: deliver a production-grade Kubernetes solution on the existing Proxmox infrastructure that could be spun up repeatably, without manual steps, and handed off to a team that would need to operate it after I left.</p>
+    <p>Before building the production platform, I stood up an initial version of the cluster for Sobranie MK — a separate Nextsense client — which served as the proving ground for the architecture. The learnings from that deployment directly informed the design of the parameterized, reusable platform described here, and confirmed that the approach was sound before it was committed to production.</p>
+    <div class="callout blue">
+      <p class="callout-label">Ownership</p>
+      <p>This was a solo project. All architectural decisions, implementation, testing, and documentation were mine. I worked in regular consultation with the senior engineer who hired me — we discussed ideas, challenged each other's choices, and made some decisions together (notably the Velero backup strategy and the eventual migration to Cilium Gateway API). The code, the automation, and the operational runbooks are mine end to end.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — Architecture</p>
+    <h2>What was built</h2>
+    <p>The platform is a 3-control-plane, 3-worker Kubernetes cluster running on Talos Linux, provisioned entirely through code. A single <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">terraform apply</code> provisions the VMs, configures Talos, bootstraps the cluster, waits for stabilization, then hands off to Ansible which installs the full software stack — networking, storage, monitoring, backup — without any human intervention.</p>
+
+    <h3>Technology choices</h3>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>Choice</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>OS</td><td>Talos Linux</td><td>Immutable, API-managed, no SSH. Forces infrastructure-as-code discipline. Eliminates configuration drift entirely.</td></tr>
+        <tr><td>CNI</td><td>Cilium 1.18.2</td><td>eBPF native routing outperforms iptables. Built-in L2 LoadBalancer eliminates MetalLB. Hubble gives network observability with zero extra tooling.</td></tr>
+        <tr><td>Storage</td><td>Longhorn</td><td>Right-sized for a 6-node cluster. Built-in NFS backup, Web UI, and CSI snapshot support. Simpler than Ceph at this scale.</td></tr>
+        <tr><td>Backup</td><td>Velero + MinIO</td><td>Two-tier: Velero handles Kubernetes manifests to MinIO (S3-compatible), Longhorn handles volume data to NFS. On-premises, no cloud egress costs.</td></tr>
+        <tr><td>IaC</td><td>Terraform + Ansible</td><td>Terraform for declarative VM lifecycle on Proxmox. Ansible for sequential Helm installs and kubectl operations where Terraform's Helm provider is cumbersome.</td></tr>
+        <tr><td>Monitoring</td><td>kube-prometheus-stack</td><td>De facto standard. Prometheus, Grafana, AlertManager, and 50+ dashboards in one chart. Longhorn and Cilium both expose Prometheus metrics natively.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — Engineering challenges</p>
+    <h2>The hard problems</h2>
+
+    <h3>Bootstrapping nodes with static IPs on an immutable OS</h3>
+    <p>Talos Linux doesn't support cloud-init or traditional network pre-configuration — VMs must boot with DHCP and have configuration applied via the Talos API after boot. This created a bootstrapping problem: the Terraform infrastructure module provisions VMs which receive DHCP addresses, but the Talos module needs to apply machine configs with the <em>desired</em> static IPs — not the temporary DHCP ones.</p>
+    <p>The solution uses a two-stage data flow. The infrastructure module exposes the DHCP-assigned IPs as Terraform outputs. The Talos module receives both the actual DHCP addresses (for connecting to apply config) and the desired static IPs (to embed in the config). A single Talos machine config template is generated with <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">PLACEHOLDER_IP</code> strings, then string replacement is applied per-node at apply time.</p>
+
+    <div class="code-block">
+      <span class="code-label">modules/talos/main.tf — per-node config injection</span>
+      <code><span class="code-kw">resource</span> <span class="code-str">"talos_machine_configuration_apply"</span> <span class="code-str">"controlplane"</span> {
+  <span class="code-key">count</span> = <span class="code-val">length(var.actual_controlplane_ips)</span>
+
+  <span class="code-comment"># connect via DHCP IP, but push config with static IP embedded</span>
+  <span class="code-key">node</span> = <span class="code-val">var.actual_controlplane_ips[count.index]</span>
+
+  <span class="code-key">machine_configuration_input</span> = <span class="code-val">replace(
+    replace(
+      data.talos_machine_configuration.controlplane.machine_configuration,
+      "PLACEHOLDER_IP/${var.network_cidr}",
+      "${var.desired_controlplane_ips[count.index]}/${var.network_cidr}"
+    ),
+    "PLACEHOLDER_IP",
+    var.desired_controlplane_ips[count.index]
+  )</span>
+}</code>
+    </div>
+
+    <h3>The disaster recovery two-tier problem</h3>
+    <p>The backup strategy required solving a chicken-and-egg problem: Velero restores Kubernetes resources, but Velero itself needs storage (Longhorn) and networking (Cilium) to function. A naïve full restore would try to bring up Prometheus, Grafana, ingress-nginx, and cert-manager before the storage layer was ready, causing cascading failures.</p>
+    <p>The solution is a dedicated <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">disaster-recovery.yaml</code> Ansible playbook that installs only the prerequisite layer — Cilium, Longhorn, CSI snapshot infrastructure, and Velero — and nothing else. Once Velero can see the MinIO backend and Longhorn can mount volumes, a single <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">velero restore create</code> command brings up the rest of the cluster.</p>
+
+    <div class="callout green">
+      <p class="callout-label">Verified result</p>
+      <p>End-to-end recovery — from a destroyed cluster to all services operational with full historical data (Prometheus metrics, Grafana dashboards, Uptime Kuma monitors) — consistently completed in 18 minutes. RPO is 24 hours (daily backup at 3 AM). The Prometheus volume retained 414MB of historical metrics across the restore.</p>
+    </div>
+
+    <h3>Ingress migration with zero downtime</h3>
+    <p>Partway through the project, NGINX Ingress Controller announced its planned retirement. Rather than defer the migration, I performed a live migration of the running cluster from NGINX Ingress to Cilium Gateway API — reconfiguring traffic routing, updating all ingress resources, validating each service individually, and ensuring the LoadBalancer IP remained uninterrupted throughout. The automation was then updated so all future cluster provisioning would deploy Cilium Gateway API directly.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">04 — Automation</p>
+    <h2>From terraform apply to ready cluster</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 1 — ~5 min</div>
+        <div class="timeline-title">VM provisioning</div>
+        <div class="timeline-desc">Terraform provisions 6 VMs on Proxmox (3 control plane, 3 worker) using the bpg/proxmox provider. VMs boot from the Talos ISO via CDROM. DHCP IPs are captured from Proxmox's QEMU guest agent output.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 2 — ~5 min</div>
+        <div class="timeline-title">Talos configuration and bootstrap</div>
+        <div class="timeline-desc">Machine secrets are generated. Per-node configs are applied to each VM via the Talos API using DHCP addresses, with static IPs injected via string replacement. The first control plane node bootstraps etcd. kubeconfig and talosconfig are written to disk.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Stabilization — 120s</div>
+        <div class="timeline-title">Cluster stabilisation wait</div>
+        <div class="timeline-desc">A Terraform time_sleep resource ensures etcd quorum is established and the API server is stable before Ansible begins. This prevents race conditions where Helm tries to install before the cluster is ready.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 3 — ~15 min</div>
+        <div class="timeline-title">Platform stack installation</div>
+        <div class="timeline-desc">Ansible installs: Cilium (with kube-proxy replacement, Hubble, L2 announcements), cert-manager, Cilium Gateway API, Longhorn (with NFS backup target), kube-prometheus-stack, Uptime Kuma, CSI snapshot infrastructure, and Velero with automated daily backup schedule. All idempotent — safe to rerun.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — Validation</p>
+    <h2>CNCF conformance testing</h2>
+    <p>Once the cluster was operational, I ran the full Sonobuoy conformance suite in <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">certified-conformance</code> mode — the same mode used for official CNCF certification submissions. Sonobuoy was a new tool to me at the time, and I'll be honest: it crashed twice during initial runs due to misconfiguration before I understood its resource requirements and mode flags properly. The third run completed successfully after approximately two hours.</p>
+    <div class="callout green">
+      <p class="callout-label">Result</p>
+      <p>400+ conformance tests passed. 0 failures. ~1000+ non-conformance tests skipped as expected. The cluster is fully CNCF-conformant on Kubernetes 1.34.1.</p>
+    </div>
+    <p>Running conformance testing wasn't a requirement — it was my own decision to validate the platform properly before handoff. If you're going to claim a cluster is production-ready, you should be able to prove it.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">06 — Operational handoff</p>
+    <h2>Built to be operated by others</h2>
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Disaster recovery manual</div><div class="highlight-item-desc">Step-by-step runbook covering the full DR process, MinIO setup, NFS configuration, backup verification, and every failure mode encountered during testing. RTO and RPO clearly stated.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Upgrade manual</div><div class="highlight-item-desc">Zero-downtime Kubernetes version upgrade guide, including the VIP certificate issue, the dry-run step, per-node timing expectations, and a real timeline from the 1.33 → 1.34 upgrade.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Architecture decisions</div><div class="highlight-item-desc">Every major technical choice documented with rationale and alternatives considered — why Talos over Ubuntu, Cilium over Calico, Longhorn over Ceph, and what the trade-offs are.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Video walkthroughs</div><div class="highlight-item-desc">Recorded screencasts of: cluster provisioning, version upgrades, backup and restore, and key operational procedures. For whoever joins the team next.</div></div>
+    </div>
+    <div class="callout amber">
+      <p class="callout-label">Known limitations at handoff</p>
+      <p>The platform was delivered without GitOps (no ArgoCD/Flux), without log aggregation (no Loki), and with AlertManager deployed but notification channels unconfigured. These were documented explicitly in a KNOWN_ISSUES.md as planned next steps rather than hidden gaps.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">07 — Reflection</p>
+    <h2>What I'd do differently</h2>
+    <p>Given more time, I would have replaced the NGINX Ingress → Cilium Gateway API migration with a direct-to-Gateway-API deployment from the start — the migration was successful but unnecessary complexity. I would also have set up external-dns earlier so ingress hostnames resolved automatically instead of requiring manual <code style="font-family:var(--mono);font-size:13px;background:var(--tag-bg);padding:1px 5px;border-radius:3px;">/etc/hosts</code> entries.</p>
+    <p>The most valuable lesson from this project was operational: documentation and video walkthroughs are not a post-project afterthought — they're part of the deliverable. A platform no one else can operate isn't finished, regardless of how clean the code is.</p>
+    <p>The most technically interesting part was the Talos bootstrapping challenge. Working within the constraints of an immutable, SSH-free OS pushed me toward a cleaner infrastructure-as-code design than I would have naturally arrived at on a traditional Linux system. Constraints tend to do that.</p>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111" target="_blank">GitHub</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>

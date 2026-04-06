@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Containerized Bookshop — EKS, Helm & CI/CD on AWS — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --red: #991B1B; --red-light: #FEF2F2; --red-border: #FECACA;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); } .callout.amber .callout-label { color: var(--amber); } .callout.blue .callout-label { color: var(--accent); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); } p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 200px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .verdict-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .verdict-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .verdict-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; }
+  .verdict-table td:first-child { font-family: var(--mono); font-size: 13px; white-space: nowrap; width: 200px; }
+  .verdict-table td:last-child { color: var(--text-muted); }
+  .verdict-bad td:first-child { color: var(--red); }
+  .code-block { background: #1E1E1E; border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .code-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7280; margin-bottom: 0.75rem; display: block; }
+  .code-block code { font-family: var(--mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.7; white-space: pre; display: block; }
+  .code-comment { color: #6B7280; } .code-key { color: #93C5FD; } .code-val { color: #86EFAC; } .code-str { color: #FDE68A; } .code-kw { color: #C4B5FD; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .timeline { border-left: 2px solid var(--border); margin: 1.5rem 0; padding-left: 1.5rem; }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.98rem; top: 0.4rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .timeline-phase { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+  .timeline-title { font-size: 15px; font-weight: 500; margin-bottom: 0.25rem; }
+  .timeline-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Learning Projects</p>
+    <h1 class="project-title">Containerized Bookshop — <em>EKS, Helm &amp; CI/CD on AWS</em></h1>
+    <p class="subtitle">A first dive into Kubernetes — taking an existing bookshop application, containerizing it, deploying it on EKS with Helm, and wiring up two CI/CD pipelines to automate everything from infrastructure provisioning to rolling deployments.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Sept – Oct 2024</span></div>
+      <div class="meta-item"><span class="meta-label">Duration</span><span class="meta-value">~6 weeks</span></div>
+      <div class="meta-item"><span class="meta-label">Context</span><span class="meta-value">Personal learning project</span></div>
+      <div class="meta-item"><span class="meta-label">Kubernetes experience at time</span><span class="meta-value">~0</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Terraform</span><span class="tag">EKS</span><span class="tag">Kubernetes</span><span class="tag">Helm</span>
+      <span class="tag">Docker</span><span class="tag">GitHub Actions</span><span class="tag">RDS PostgreSQL</span>
+      <span class="tag">Bastion Host</span><span class="tag">Rolling Updates</span><span class="tag">AWS VPC</span><span class="tag">Secrets Manager</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">2</span><span class="stat-label">Separate CI/CD pipelines — infra and application, decoupled</span></div>
+    <div class="stat-card"><span class="stat-number">2</span><span class="stat-label">NAT Gateways — one per AZ, fixing the SPOF from project one</span></div>
+    <div class="stat-card"><span class="stat-number">4</span><span class="stat-label">Replicas per deployment with rolling update strategy</span></div>
+    <div class="stat-card"><span class="stat-number">✓</span><span class="stat-label">The bookshop worked. Products loaded. The app ran.</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>The next step</h2>
+    <p>The WordPress project got the foundations right — modular Terraform, remote state, Secrets Manager, a working site. But it was a single-instance application with no containers, no orchestration, and no real deployment pipeline. The obvious next step was Kubernetes, and the obvious place to start was EKS.</p>
+    <p>The application itself wasn't mine — an existing bookshop with a Java Spring Boot backend and a React frontend. The goal wasn't to write software; it was to learn how to containerize, deploy, and operate someone else's application on a real Kubernetes cluster. Dockerfiles, Helm charts, CI/CD pipelines, EKS node groups — all of it from scratch, with essentially zero Kubernetes experience going in.</p>
+    <div class="callout blue">
+      <p class="callout-label">Scope</p>
+      <p>Two GitHub repositories, two CI/CD pipelines, one EKS cluster. The infrastructure repo handles everything from VPC to EKS to RDS. The code repo handles building Docker images and triggering rolling deployments. They're connected by a single shared artifact — the RDS endpoint — passed between pipelines via S3.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — What improved from project one</p>
+    <h2>The things that got better</h2>
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">NAT Gateway per AZ</div><div class="highlight-item-desc">The single NAT Gateway SPOF from project one was gone. The networking module provisions one NAT Gateway per public subnet, each routing its own private app subnet.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Multi-AZ from the start</div><div class="highlight-item-desc">multi_az = true and skip_final_snapshot = false set from day one — not added on the final run as an afterthought.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Real containerization</div><div class="highlight-item-desc">Both services run as Docker containers. Dockerfiles written from scratch for a Java Spring Boot backend and a React frontend. Images pushed to Docker Hub via CI, pulled by EKS at deploy time.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Decoupled pipelines</div><div class="highlight-item-desc">Infrastructure and application deployments are separate concerns. Terraform Apply triggers the EKS deploy. Code changes trigger image builds and rolling updates. Neither pipeline knows about the other's internals.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Helm charts</div><div class="highlight-item-desc">Both services deployed via Helm with parameterized values — DB endpoint, credentials, backend URL all injected at deploy time. Rolling update strategy configured with maxSurge: 1 / maxUnavailable: 1.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Secrets Manager pattern carried forward</div><div class="highlight-item-desc">Same pattern as project one — DB credentials fetched via data source at apply time, never hardcoded. EKS node security group fetched dynamically.</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — Architecture</p>
+    <h2>What was built</h2>
+
+    <div class="arch-diagram">
+      <img src="Infrastructure.png" alt="EKS Bookshop Infrastructure Diagram" style="width:100%;display:block;border-radius:4px;"/>
+    </div>
+
+    <table class="tech-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>What it does</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>networking module</td>
+          <td>VPC, public/app/DB subnets across 2 AZs, IGW, one NAT GW per AZ</td>
+          <td>Fixed SPOF from project one — each AZ has its own NAT GW and route table</td>
+        </tr>
+        <tr>
+          <td>application module</td>
+          <td>EKS cluster + managed node group (t3.medium, 2–6 nodes, 4 desired)</td>
+          <td>Cluster and nodes in private app subnets. IAM roles for cluster and node group provisioned separately.</td>
+        </tr>
+        <tr>
+          <td>database module</td>
+          <td>RDS PostgreSQL 16.3 in private DB subnets, Multi-AZ, credentials via Secrets Manager</td>
+          <td>Security group allows ingress from EKS cluster SG and Bastion SG only. EKS SG fetched dynamically.</td>
+        </tr>
+        <tr>
+          <td>bastion module</td>
+          <td>t2.micro EC2 in public subnet, SSH key injected via GitHub secret</td>
+          <td>Exists only to seed the DB. Used by CI pipeline on every fresh apply, then left idle.</td>
+        </tr>
+        <tr>
+          <td>Helm — backend chart</td>
+          <td>Spring Boot deployment (4 replicas), LoadBalancer service, DB secret</td>
+          <td>DB endpoint, username, password, name all injected at deploy time via <code style="font-family:var(--mono);font-size:12px;background:var(--tag-bg);padding:1px 4px;border-radius:3px;">--set</code> flags</td>
+        </tr>
+        <tr>
+          <td>Helm — frontend chart</td>
+          <td>React deployment (4 replicas), LoadBalancer service</td>
+          <td>Backend URL injected at deploy time. Two LoadBalancers — one per service.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+
+  <section class="section">
+    <p class="section-eyebrow">04 — The pipelines</p>
+    <h2>How everything connected</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Infra repo — workflow 1</div>
+        <div class="timeline-title">Terraform Apply</div>
+        <div class="timeline-desc">Triggered manually. Provisions the full stack — VPC, EKS cluster, node group, RDS, Bastion. Extracts the RDS endpoint, strips the port, and uploads it to S3. Also SSHes into the Bastion and loads the SQL dump into PostgreSQL — the database is seeded as part of infrastructure provisioning.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Infra repo — workflow 2</div>
+        <div class="timeline-title">Deploy to EKS</div>
+        <div class="timeline-desc">Triggered automatically when Terraform Apply completes. Downloads the RDS endpoint from S3, updates kubeconfig, creates the Kubernetes namespace, then deploys backend and frontend via Helm in sequence. Backend deploys first — the pipeline waits for its LoadBalancer to get an external hostname before deploying the frontend.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Code repo — workflow 1</div>
+        <div class="timeline-title">Build and Push Docker Images</div>
+        <div class="timeline-desc">Triggered manually on code changes. Builds both Docker images and pushes them to Docker Hub with the latest tag.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Code repo — workflow 2</div>
+        <div class="timeline-title">Update EKS Deployment</div>
+        <div class="timeline-desc">Triggered automatically after the build completes. Updates both deployments with the new image tag using kubectl set image, then verifies rollout status. Kubernetes handles the rolling update — old pods stay alive until new ones pass readiness.</div>
+      </div>
+    </div>
+    <div class="callout blue">
+      <p class="callout-label">The S3 handoff</p>
+      <p>The RDS endpoint needed to travel from the Terraform Apply workflow to the Deploy to EKS workflow. The solution: write the endpoint to a file, upload it to the same S3 bucket used for Terraform remote state, download it in the next workflow. Simple, effective, and requires no additional infrastructure.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — The interesting problems</p>
+    <h2>What was actually hard</h2>
+
+    <h3>Seeding a private database from CI</h3>
+    <p>The RDS instance lives in a private subnet with no public access. But the GitHub Actions runner is on the public internet. The solution was the Bastion host. The CI pipeline SSHes into it from the runner, copies the SQL dump over SCP, installs the PostgreSQL client, and runs psql from inside the VPC where it can reach RDS. The SSH private key is stored as a GitHub secret, base64-encoded, decoded to a temp file during the workflow, and deleted immediately after.</p>
+
+    <h3>The frontend/backend connection problem</h3>
+    <p>This one took longer to solve than it should have, and the root cause was a gap in understanding how React applications actually work. The assumption was that the frontend could reach the backend via a Kubernetes service name. It can't. React builds run in the user's browser, which has no idea what backend-service.devops-project.svc.cluster.local means.</p>
+    <p>The fix was to expose the backend as a LoadBalancer service, wait for AWS to provision the load balancer and assign it an external hostname, then inject that hostname into the frontend deployment as REACT_APP_API_BASE_URL. Two LoadBalancers — one for frontend, one for backend. It works, but it's not the right answer.</p>
+    <div class="callout amber">
+      <p class="callout-label">What I'd do now</p>
+      <p>A single ingress controller with path-based routing: /api/* to the backend service, /* to the frontend. One LoadBalancer, one external hostname, no dynamic URL injection needed. The frontend talks to /api which the ingress routes internally — the browser never needs to know the backend exists as a separate service.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">06 — What still wasn't right</p>
+    <h2>The gaps — honest view</h2>
+    <table class="verdict-table">
+      <thead><tr><th>Gap</th><th>What it means</th><th>What I'd do now</th></tr></thead>
+      <tbody>
+        <tr class="verdict-bad"><td>latest image tag</td><td>Both services always push and pull :latest. No versioning, no rollback path — if a bad image gets pushed, there's no previous tag to roll back to.</td><td>Semantic versioning or commit SHA tags. The observability project that followed introduced this properly.</td></tr>
+        <tr class="verdict-bad"><td>Two LoadBalancers</td><td>One per service. Costs more, exposes more surface, and was only necessary because the frontend/backend networking wasn't understood yet.</td><td>Single ingress controller with path-based routing as described above.</td></tr>
+        <tr class="verdict-bad"><td>No HTTPS</td><td>Both LoadBalancers serve plain HTTP. Still the same gap as project one.</td><td>ACM certificate, HTTPS listener, HTTP redirect. Easier with a single ingress — one cert, one termination point.</td></tr>
+        <tr class="verdict-bad"><td>No observability</td><td>No metrics, no logging aggregation, no dashboards. If something breaks in the cluster, the only tool is kubectl logs.</td><td>This was the direct motivation for the next project — a local deployment specifically to practice Prometheus, Grafana, and ArgoCD.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">07 — Reflection</p>
+    <h2>What this project actually was</h2>
+    <p>Six weeks of learning Kubernetes by doing it. Not reading about it, not following a tutorial step-by-step — building something real on EKS with zero prior experience and a budget that demanded destroying and rebuilding it repeatedly. Most of the hard problems came from not knowing what I didn't know: the frontend/backend networking issue, the redundant rollout restart, the hardcoded API URL in the Dockerfile. These aren't obscure edge cases — they're things that become obvious once you understand how the pieces fit together.</p>
+    <p>The things that did work are worth naming. The Bastion seeding pattern is a legitimate solution to a real constraint. The decoupled pipeline design is correct — infra and application deployments should be separate concerns. The Helm charts are parameterized properly, secrets are handled cleanly, and the rolling update configuration is sound.</p>
+    <div class="callout green">
+      <p class="callout-label">What came next</p>
+      <p>The absence of observability in this project was obvious and frustrating. The next project was a deliberate response to that — deploying the same bookshop application locally with a full monitoring stack: Prometheus, Grafana, PostgreSQL Exporter, ArgoCD for GitOps, and proper semantic versioning in the CI pipeline.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/BookshopDeployment-Infrastructure" target="_blank">Infra Repo</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/BookshopDeployment-Code/tree/main/backend" target="_blank">Code Repo</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>

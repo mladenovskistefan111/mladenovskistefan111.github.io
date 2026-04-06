@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billtrust — Site Reliability Engineering — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --red: #991B1B; --red-light: #FEF2F2; --red-border: #FECACA;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(247,245,240,0.92);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 2rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue  { background: var(--accent-light); border-color: var(--accent); }
+  .callout.red   { background: var(--red-light); border-color: var(--red); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.blue  .callout-label { color: var(--accent); }
+  .callout.red   .callout-label { color: var(--red); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); }
+  p:last-child { margin-bottom: 0; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .chapter-break { margin: 4rem 0; display: flex; align-items: center; gap: 1.5rem; }
+  .chapter-break-line { flex: 1; border: none; border-top: 2px solid var(--border-strong); }
+  .chapter-break-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); white-space: nowrap; padding: 4px 12px; border: 1px solid var(--border-strong); border-radius: 3px; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 200px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .timeline { border-left: 2px solid var(--border); margin: 1.5rem 0; padding-left: 1.5rem; }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.98rem; top: 0.4rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .timeline-phase { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+  .timeline-title { font-size: 15px; font-weight: 500; margin-bottom: 0.25rem; }
+  .timeline-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Professional Work</p>
+    <h1 class="project-title">Billtrust — <em>Site Reliability Engineering</em></h1>
+    <p class="subtitle">SRE work at Billtrust via IWConnect — multi-cloud production operations, a full APM and RUM observability audit that identified $100k+ in annual savings, toil elimination through automation, and 24/7 on-call across payment processing infrastructure.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Role</span><span class="meta-value">Site Reliability Engineer</span></div>
+      <div class="meta-item"><span class="meta-label">Client</span><span class="meta-value">Billtrust (via IWConnect)</span></div>
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Nov 2025 – Present</span></div>
+      <div class="meta-item"><span class="meta-label">Environment</span><span class="meta-value">AWS · Azure · Multi-cloud</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Datadog APM</span><span class="tag">Datadog RUM</span><span class="tag">OpenTelemetry</span>
+      <span class="tag">PagerDuty</span><span class="tag">Rundeck</span><span class="tag">AWS</span><span class="tag">Azure</span>
+      <span class="tag">n8n</span><span class="tag">PowerShell</span><span class="tag">Exchange Online</span><span class="tag">Jira</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">$100k<span style="font-size:1rem;font-weight:300;">+</span></span><span class="stat-label">Identified annual savings across APM and RUM observability spend</span></div>
+    <div class="stat-card"><span class="stat-number">80<span style="font-size:1rem;font-weight:300;">%</span></span><span class="stat-label">Reduction in trace noise on high-volume services</span></div>
+    <div class="stat-card"><span class="stat-number">700<span style="font-size:1rem;font-weight:300;">+</span></span><span class="stat-label">Exchange Online mailboxes under fully automated lifecycle management</span></div>
+    <div class="stat-card"><span class="stat-number">24/7</span><span class="stat-label">PagerDuty on-call rotation across multi-cloud production environments</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — APM Observability Audit</p>
+    <h2>Finding the signal in the noise</h2>
+    <p>Shortly after joining, it became clear that Billtrust's Datadog APM spend had grown significantly without a corresponding improvement in observability quality. The fleet was running at 100% trace sampling across the board — no sampling strategy, no differentiation between high-value and low-value services, no consideration for what the data was actually being used for. The result was a fleet of Datadog agents in LIMITED RESOURCE status, dropping traces under the volume they were expected to process, and creating monitoring blind spots at the exact moments they were most needed.</p>
+    <p>The audit started with a straightforward question: what are we actually ingesting, and does it justify the cost? Two weeks of analysis across billing data, service ingestion summaries, agent health metrics, and trace samples produced an answer that was difficult to argue with.</p>
+    <div class="callout blue">
+      <p class="callout-label">The indexing paradox</p>
+      <p>The clearest signal that something was wrong: of the total allotted indexed spans capacity, only 6.6% was being used. Datadog's indexing algorithms are designed to retain traces that are statistically significant, unusual, or represent errors. Using only 6.6% of indexing capacity meant that 93.4% of what was being ingested was so repetitive and low-value that even Datadog's own systems didn't consider it worth keeping. The infrastructure was being overwhelmed to collect data that was immediately discarded as noise.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — The ingestion problem</p>
+    <h2>Three services, the majority of the noise</h2>
+    <p>Investigation into the highest-volume services revealed that a small number of services were responsible for the overwhelming majority of ingestion. Each had been running at 100% sampling — a default that had never been revisited. The problem wasn't that these services were unimportant. It was that 100% sampling of routine, repetitive, high-frequency operations provides no observability benefit over intelligent sampling, and carries significant cost at every layer: Datadog ingestion charges, AWS egress fees for transmitting the data, and agent CPU and memory overhead processing it.</p>
+
+    <h3>High-volume event processor — the worst offender</h3>
+    <p>A high-throughput streaming worker responsible for synchronizing invoice and payment records between two internal systems was generating a disproportionate share of total ingestion. Each message it processed triggered 8–10 spans — database reads, HTTP calls, database writes, and downstream notifications — and it processed hundreds of messages per minute continuously. The trace data was so voluminous that Datadog's UI could only display 0.1% of spans. The operation pattern was almost entirely routine: fast, successful, repetitive. The success rate exceeded 99%.</p>
+    <p>The question the audit posed directly: does capturing a trace for every successful sync operation provide any observability value beyond what 5% sampling would provide? With 5% sampling and 100% error capture, over a million traces per month would still be available — sufficient to monitor performance trends, detect anomalies, and debug any failure. The recommendation was 5% sampling with 100% error capture, reducing ingestion on this service alone by approximately 95%.</p>
+
+    <h3>External API gateway — a different problem</h3>
+    <p>The external API gateway handling partner and customer traffic presented a more nuanced challenge. Unlike the streaming worker, this service handles actual business transactions — every request represents a real customer or partner interaction. Traditional fixed-rate sampling was inappropriate here because the traffic is mixed: high-frequency routine calls alongside low-frequency critical operations, expected business errors alongside genuine infrastructure failures.</p>
+    <p>The recommendation for this service was Datadog Adaptive Sampling rather than a fixed rate. Adaptive sampling automatically adjusts rates per endpoint and status code — prioritising rare patterns, unusual errors, and high-latency requests while reducing sampling of repetitive successful responses. This preserves full error visibility, maintains statistical diversity across all traffic patterns, and adapts automatically as traffic changes. Complementary application-level logging to Splunk meant that reducing APM sampling did not create audit gaps — the business-critical event trail existed independently of trace data.</p>
+
+    <h3>Customer-facing payment portal</h3>
+    <p>A PHP-based customer portal where end users view invoices and make payments was generating substantial trace volume from routine web interactions — page loads, session lookups, database reads — all succeeding, all repetitive, all generating nearly identical traces. The portal had comprehensive logging and analytics outside APM that covered the same ground. The recommendation was the same 5% sampling with 100% error capture pattern applied to the streaming worker.</p>
+
+    <div class="callout green">
+      <p class="callout-label">Projected impact — top three services</p>
+      <p>Optimising these three services alone was projected to reduce total monthly ingestion by approximately 40TB — eliminating all ingestion overage charges and bringing the fleet comfortably within the included baseline. Combined with a right-sized host commitment, the total projected APM savings exceeded $40,000 annually, before accounting for proportional reductions in AWS egress costs for trace data leaving AWS infrastructure.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — Implementation</p>
+    <h2>Getting the prerequisites in place</h2>
+    <p>The sampling strategy required a prerequisite that wasn't in place: the ability to configure error sampling rates independently of trace sampling rates. This feature requires sufficiently modern tracing library versions — several services were running libraries two to three years out of date, predating the capability entirely. Getting the sampling changes into production therefore required coordinating tracing library upgrades with development teams across multiple services before any configuration changes could be applied.</p>
+    <p>In parallel, the Datadog Agents across the fleet needed to be upgraded and remote configuration needed to be enabled. Remote configuration allows sampling rates and other Agent configurations to be changed directly through the Datadog UI without requiring application redeployment — a critical capability for an SRE team without direct access to application code or infrastructure configuration. Once remote configuration was enabled, sampling strategies could be deployed and adjusted in real time through the Datadog portal, with immediate effect across the fleet.</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Week 1–2</div>
+        <div class="timeline-title">Audit and analysis</div>
+        <div class="timeline-desc">Full review of APM billing data, agent health metrics, service ingestion summaries, and trace samples. Identified the indexing paradox, the top offending services, and the agent LIMITED RESOURCE issue. Produced the analysis document with specific per-service recommendations and projected financial impact.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Month 1–3</div>
+        <div class="timeline-title">Prerequisite rollout</div>
+        <div class="timeline-desc">Coordinated tracing library upgrades with development teams across affected services. Worked with systems teams to upgrade Datadog Agents from outdated versions — several nodes were running release candidate builds in production — and to enable remote configuration across the fleet.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">After prerequisites</div>
+        <div class="timeline-title">Sampling configuration via remote config</div>
+        <div class="timeline-desc">With modern tracing libraries and remote configuration in place, sampling strategies were applied through the Datadog portal without touching application code or requiring deployments. Error sampling maintained at 100% across all affected services. Fleet agent health confirmed stable following ingestion reduction.</div>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <p class="callout-label">Better observability through less data</p>
+      <p>The counterintuitive outcome: reducing ingestion improved observability quality. With agents no longer in LIMITED RESOURCE status, traces stopped being dropped during high-traffic periods. The monitoring blind spots that existed precisely when they were most needed — during incidents — were eliminated. Less data, more reliable signal.</p>
+    </div>
+  </section>
+
+  <div class="chapter-break"><div class="chapter-break-line"></div><div class="chapter-break-label">RUM Audit</div><div class="chapter-break-line"></div></div>
+
+  <section class="section">
+    <p class="section-eyebrow">04 — RUM Observability Audit</p>
+    <h2>The same problem on the frontend</h2>
+    <p>RUM — Real User Monitoring — captures what actually happens when users interact with web applications in production: page load performance, JavaScript errors, network failures, user journeys. Unlike APM which instruments the backend, RUM instruments the browser. At Billtrust, a payments company, the frontend is where customers experience the product directly — hosted payment pages, customer portals, partner integrations. RUM is how the team sees what customers see.</p>
+    <p>The same pattern found in APM appeared in RUM: 100% session sampling across all applications, persistent monthly overages above the committed session allocation, and no differentiation between applications where comprehensive monitoring was clearly justified and applications where it was clearly wasteful.</p>
+
+    <h3>The RUM sampling constraint</h3>
+    <p>RUM sampling has an important characteristic that APM does not: it is absolute at the session level. If a session is sampled out at initialization, no data is captured for that session at all — not page views, not interactions, and critically, not errors. This means RUM sampling decisions require more careful analysis than APM sampling decisions. Reducing RUM sampling on an application where errors are business-critical eliminates error visibility entirely, not just reduces it statistically.</p>
+    <p>This constraint shaped the entire optimization strategy: applications needed to be assessed individually based on what the RUM data was actually being used for and whether errors elsewhere in the stack provided equivalent coverage.</p>
+
+    <h3>The clear quick win</h3>
+    <p>The most obvious candidate for optimization was an SSO authentication frontend — high session volume, average session duration of 3.1 seconds, no user journey to analyze beyond a login redirect. Users pass through this application in seconds and are immediately redirected to their destination. Each "session" is an authentication handshake, not a user experience. The application had already had Session Replay disabled on the same reasoning — the same logic applied to base RUM session capture. Authentication errors are captured by backend systems and by the destination applications users redirect to. RUM provided cost without proportional observability value.</p>
+
+    <h3>Retention strategy — the SKU transition</h3>
+    <p>During the RUM audit period, Datadog transitioned RUM from a sessions-based billing model to a new SKU structure separating RUM Measure (derives metrics from sessions), from RUM Investigate (indexes sessions). Applying retention strategies to this new model — defining which applications warranted full Investigate coverage versus lighter Measure coverage — was part of the optimization work, layering on top of the sampling changes to bring total RUM spend within committed allocation.</p>
+
+    <div class="callout green">
+      <p class="callout-label">Combined outcome</p>
+      <p>APM and RUM optimizations together — sampling strategy implementation, agent fleet cleanup, right-sized commitment planning, and RUM retention strategy — identified and delivered over $100,000 in annual savings while maintaining 100% visibility into critical errors and system health across the production fleet.</p>
+    </div>
+  </section>
+
+  <div class="chapter-break"><div class="chapter-break-line"></div><div class="chapter-break-label">Other work</div><div class="chapter-break-line"></div></div>
+
+  <section class="section">
+    <p class="section-eyebrow">05 — Automation &amp; toil elimination</p>
+    <h2>Turning manual work into platform features</h2>
+
+    <h3>Exchange Online mailbox lifecycle platform</h3>
+    <p>Billtrust operates over 700 Exchange Online shared mailboxes used for client communication and operational workflows. The provisioning, maintenance, and deprovisioning of these mailboxes was handled manually — a significant and recurring source of operational toil, and a risk: mailboxes approaching storage limits would cause service disruption for clients without proactive intervention.</p>
+    <p>The solution was a fully automated PowerShell platform covering the entire mailbox lifecycle. Provisioning is triggered by Jira ticket parsing — when a provisioning request arrives, the platform reads the ticket, creates the mailbox with the specified configuration, and updates the ticket with completion status. Daily retention policy enforcement runs across all 700+ mailboxes, identifying and applying size-based retention rules before any mailbox approaches its storage limit. Batch status reporting feeds into Datadog dashboards, giving the team real-time visibility into fleet health without manual checks. Deprovisioning follows the same Jira-driven pattern as provisioning — no manual intervention required at any stage of the lifecycle.</p>
+
+    <h3>AI-assisted alert remediation with n8n</h3>
+    <p>Recurring production incidents often follow the same pattern: an alert fires, an on-call engineer runs through a known runbook, confirms resolution, and closes the ticket. For common, well-understood incidents, this is pure toil — the decision tree is deterministic and the remediation steps are documented. The work in progress is an n8n workflow that intercepts these alerts, executes the relevant runbook steps automatically, verifies resolution, and logs the outcome. When automation resolves the incident, it closes the alert with a summary. When it cannot — because the failure is outside the expected pattern or remediation fails — it escalates to PagerDuty with a summary of what was attempted, giving the on-call engineer context before they pick up the page.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">06 — Production operations</p>
+    <h2>Day-to-day SRE</h2>
+    <p>Beyond the project work, the role is production SRE in the fullest sense. The environment is multi-cloud — AWS and Azure — spanning payment processing systems, invoice management platforms, and the integrations between them. On-call is 24/7 via PagerDuty, contributing to P1 incident response across multiple teams.</p>
+    <p>Production incidents range from payment processing anomalies and database performance degradation to Rundeck job failures, FTP connectivity issues, and synthetic monitoring alerts. Datadog is the primary observability platform — building and maintaining monitors, dashboards, and alerting pipelines, and using APM traces and RUM session data directly in incident investigation. The observability audit work wasn't separate from production operations; it came directly from operating the monitoring infrastructure and identifying where it was working against itself.</p>
+
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Incident response</div><div class="highlight-item-desc">P1 response across payment processing, database, and integration systems. Multi-team coordination. PagerDuty rotation with runbook-driven remediation and escalation paths.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Monitoring platform</div><div class="highlight-item-desc">Datadog monitors, dashboards, and alerting pipelines across multi-cloud infrastructure. APM, RUM, synthetic monitoring, and custom metrics all in active use.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Rundeck automation</div><div class="highlight-item-desc">Self-service workflows for FileOps and development teams — mailbox provisioning, FTP management, infrastructure maintenance — enabling teams to operate autonomously without SRE involvement.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Governance and compliance</div><div class="highlight-item-desc">Datadog Agent version governance across the fleet. Tracing library compliance tracking. Policy-as-code retention enforcement for 700+ mailboxes with automated Jira-integrated capacity alerting.</div></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111" target="_blank">GitHub</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>
