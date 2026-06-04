@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telekom MK — Infrastructure & Performance Engineering — Stefan Mladenovski</title>
+<title>Infrastructure & Performance Engineering — Stefan Mladenovski</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -86,11 +86,10 @@
 <div class="page">
   <header class="header">
     <p class="breadcrumb">Stefan Mladenovski — Portfolio / Infrastructure &amp; Performance</p>
-    <h1 class="project-title">Telekom Web Shop — Infrastructure Automation <em>&amp; Performance Engineering</em></h1>
+    <h1 class="project-title">Web Store — Infrastructure Automation <em>&amp; Performance Engineering</em></h1>
     <p class="subtitle">A fully automated, zero-downtime deployment platform for a 14-server air-gapped telecoms environment — and the performance incident that followed go-live, the diagnosis, and the load testing platform built to prove the fix held.</p>
     <div class="meta-row">
       <div class="meta-item"><span class="meta-label">Role</span><span class="meta-value">DevOps Engineer</span></div>
-      <div class="meta-item"><span class="meta-label">Client</span><span class="meta-value">Telekom MK (via Nextsense Ltd.)</span></div>
       <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">Jun – Nov 2025</span></div>
       <div class="meta-item"><span class="meta-label">Environment</span><span class="meta-value">14 servers, air-gapped datacenter</span></div>
     </div>
@@ -112,11 +111,11 @@
   <section class="section">
     <p class="section-eyebrow">01 — Context</p>
     <h2>Starting from nothing</h2>
-    <p>Telekom MK — North Macedonia's national telecoms operator — was launching a major version upgrade of their public web store, built on Nextsense's proprietary CMS. Their existing setup was two virtual machines, everything co-located, no reverse proxy, no HA, and a manual deployment process that took around 30 minutes per server. For the new version, they provisioned 14 servers across their datacenter: 4 web servers, 2 CMS servers, 2 file share servers, 3 Nginx proxies, and a 3-node MongoDB replica set.</p>
+    <p>North Macedonia's national telecoms operator — was launching a major version upgrade of their public web store, built on Nextsense's proprietary CMS. Their existing setup was two virtual machines, everything co-located, no reverse proxy, no HA, and a manual deployment process that took around 30 minutes per server. For the new version, they provisioned 14 servers across their datacenter: 4 web servers, 2 CMS servers, 2 file share servers, 3 Nginx proxies, and a 3-node MongoDB replica set.</p>
     <p>I was brought in as the first hire specifically for this engagement. The brief was to own everything from the operating system configuration upward: consistency across all VMs, zero-downtime deployments, a blue-green promotion workflow for their CMS editorial team, and infrastructure reusable enough to be adapted for other clients. There were no existing playbooks, no internal runbooks, no prior Ansible usage at the company.</p>
     <div class="callout blue">
       <p class="callout-label">Constraint</p>
-      <p>All servers were completely air-gapped — Telekom's datacenter security policy prohibited internet access from the VMs. Every package, every dependency had to be carried in manually and installed offline via dpkg or local file copy. This affected every role I wrote.</p>
+      <p>All servers were completely air-gapped — our client's datacenter security policy prohibited internet access from the VMs. Every package, every dependency had to be carried in manually and installed offline via dpkg or local file copy. This affected every role I wrote.</p>
     </div>
   </section>
 
@@ -166,7 +165,7 @@
     </div>
     <div class="callout green">
       <p class="callout-label">Production usage</p>
-      <p>This workflow ran 3–5 times per business day once the system was live. The non-technical Telekom CMS team ran it daily in production for the duration of the engagement.</p>
+      <p>This workflow ran 3–5 times per business day once the system was live. The non-technical marketing CMS team ran it daily in production for the duration of the engagement.</p>
     </div>
   </section>
 
@@ -200,7 +199,7 @@
 make install
 
 <span class="code-comment"># Run a distributed load test — file is required, everything else defaults to 1</span>
-make load <span class="code-key">file</span>=<span class="code-str">telekom-prod.js</span> <span class="code-key">pods</span>=<span class="code-val">3</span> <span class="code-key">vus</span>=<span class="code-val">200</span> <span class="code-key">duration</span>=<span class="code-val">10</span>
+make load <span class="code-key">file</span>=<span class="code-str">webstore-prod.js</span> <span class="code-key">pods</span>=<span class="code-val">3</span> <span class="code-key">vus</span>=<span class="code-val">200</span> <span class="code-key">duration</span>=<span class="code-val">10</span>
 
 <span class="code-comment"># Generates TestRun CRD → kubectl apply → streams pod logs live</span>
 <span class="code-comment"># All metrics appear in the pre-provisioned Grafana dashboard automatically</span></code>
