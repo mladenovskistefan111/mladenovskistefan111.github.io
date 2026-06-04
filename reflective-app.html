@@ -146,7 +146,7 @@
 <span class="code-kw">const</span> authFailures = meter.createCounter(<span class="code-str">'auth_failures_total'</span>);
 
 <span class="code-comment">// Database operation wrapper — creates a span, records duration, handles errors</span>
-<span class="code-kw">export const</span> withDatabaseSpan = <span class="code-kw">async</span> &lt;T&gt;(
+<span class="code-kw">export const</span> withDatabase Span = <span class="code-kw">async</span> &lt;T&gt;(
   name: string,
   operation: () =&gt; Promise&lt;T&gt;,
   attributes?: Record&lt;string, string | number | boolean&gt;
@@ -209,7 +209,7 @@
     <p>OpenTelemetry instrumented from the inside looks different from OpenTelemetry configured from the outside. Writing the withDatabaseSpan wrapper, deciding which attributes to attach to which spans, figuring out why correlation IDs weren't propagating through the Pino logger — that's a different kind of understanding than deploying a pre-instrumented application and watching the dashboards.</p>
     <div class="callout green">
       <p class="callout-label">What came next</p>
-      <p>The Nextsense job. Real production infrastructure, real clients. The observability work here fed directly into the Datadog APM and RUM work at Billtrust, where the same concepts — trace sampling, metric cardinality, log correlation — appeared at a significantly larger scale.</p>
+      <p>The Nextsense job. Real production infrastructure, real clients. The observability work here fed directly into the Datadog APM and RUM work, where the same concepts — trace sampling, metric cardinality, log correlation — appeared at a significantly larger scale.</p>
     </div>
   </section>
 
