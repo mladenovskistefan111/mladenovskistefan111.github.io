@@ -111,7 +111,7 @@
   <section class="section">
     <p class="section-eyebrow">01 — Context</p>
     <h2>Starting from nothing</h2>
-    <p>North Macedonia's national telecoms operator — was launching a major version upgrade of their public web store, built on Nextsense's proprietary CMS. Their existing setup was two virtual machines, everything co-located, no reverse proxy, no HA, and a manual deployment process that took around 30 minutes per server. For the new version, they provisioned 14 servers across their datacenter: 4 web servers, 2 CMS servers, 2 file share servers, 3 Nginx proxies, and a 3-node MongoDB replica set.</p>
+    <p>A national telecoms operator was launching a major version upgrade of their public web store, built on Nextsense's proprietary CMS. Their existing setup was two virtual machines, everything co-located, no reverse proxy, no HA, and a manual deployment process that took around 30 minutes per server. For the new version, they provisioned 14 servers across their datacenter: 4 web servers, 2 CMS servers, 2 file share servers, 3 Nginx proxies, and a 3-node MongoDB replica set.</p>
     <p>I was brought in as the first hire specifically for this engagement. The brief was to own everything from the operating system configuration upward: consistency across all VMs, zero-downtime deployments, a blue-green promotion workflow for their CMS editorial team, and infrastructure reusable enough to be adapted for other clients. There were no existing playbooks, no internal runbooks, no prior Ansible usage at the company.</p>
     <div class="callout blue">
       <p class="callout-label">Constraint</p>

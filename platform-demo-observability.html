@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Demo — Observability &amp; Secure Delivery for a Polyglot Microservices App — Stefan Mladenovski</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: #E2DDD6; --border-strong: #C8C2B8;
+    --text: #1A1816; --text-muted: #6B6560; --text-faint: #9E9892;
+    --accent: #1D4ED8; --accent-light: #EFF6FF; --accent-muted: #93C5FD;
+    --green: #166534; --green-light: #F0FDF4; --green-border: #BBF7D0;
+    --amber: #92400E; --amber-light: #FFFBEB; --amber-border: #FDE68A;
+    --tag-bg: #EDE9E3; --tag-text: #4A4540;
+    --mono: 'IBM Plex Mono', monospace; --serif: 'Fraunces', Georgia, serif; --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .portfolio-nav { position: sticky; top: 0; z-index: 100; background: rgba(247,245,240,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .portfolio-nav a { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; letter-spacing: 0.06em; }
+  .portfolio-nav a:hover { text-decoration: underline; }
+  .portfolio-nav-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .page { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--border-strong); padding-bottom: 3rem; margin-bottom: 3.5rem; }
+  .breadcrumb { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .project-title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1rem; max-width: 700px; }
+  .project-title em { font-style: italic; color: var(--text-muted); }
+  .subtitle { font-size: 1.05rem; color: var(--text-muted); font-weight: 300; max-width: 620px; margin-bottom: 2rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 3px; border: 1px solid var(--border); }
+  .callout { border-radius: 6px; padding: 1.25rem 1.5rem; margin: 2rem 0; border-left: 3px solid; }
+  .callout.green { background: var(--green-light); border-color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: var(--amber); }
+  .callout.blue { background: var(--accent-light); border-color: var(--accent); }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.4rem; }
+  .callout.green .callout-label { color: var(--green); } .callout.amber .callout-label { color: var(--amber); } .callout.blue .callout-label { color: var(--accent); }
+  .callout p { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .callout ul { margin: 0.5rem 0 0 1.1rem; font-size: 15px; line-height: 1.65; }
+  .callout li { margin-bottom: 0.45rem; }
+  .callout li:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .stat-card { background: var(--surface); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-number { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .section { margin-bottom: 3.5rem; }
+  .section-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: 1.65rem; font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.25; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  p { margin-bottom: 1rem; color: var(--text); } p:last-child { margin-bottom: 0; }
+  a.inline { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-muted); }
+  a.inline:hover { border-bottom-color: var(--accent); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1.5rem 0; }
+  .tech-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); font-weight: 400; text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .tech-table td:first-child { font-family: var(--mono); font-size: 13px; color: var(--accent); white-space: nowrap; width: 200px; }
+  .tech-table td:last-child { color: var(--text-muted); font-size: 13px; }
+  .tech-table td:first-child a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--accent-muted); }
+  .tech-table td:first-child a:hover { border-bottom-style: solid; }
+  .highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .highlight-item { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .highlight-item-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .highlight-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+  .footer-link { font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
+  .footer-link:hover { text-decoration: underline; }
+  .footer-note { font-size: 12px; color: var(--text-faint); }
+  @media (max-width: 640px) { .page { padding: 2rem 1.25rem 4rem; } .meta-row { gap: 1rem; } .stat-number { font-size: 1.5rem; } .tech-table td:first-child { white-space: normal; width: auto; } }
+</style>
+</head>
+<body>
+<nav class="portfolio-nav"><a href="index.html">← Portfolio</a><span class="portfolio-nav-label">Stefan Mladenovski</span></nav>
+<div class="page">
+  <header class="header">
+    <p class="breadcrumb">Stefan Mladenovski — Portfolio / Learning Projects</p>
+    <h1 class="project-title">Platform Demo — <em>Observability &amp; Secure Delivery for a Polyglot Microservices App</em></h1>
+    <p class="subtitle">A ten-service e-commerce demo, based on Google's Online Boutique, wrapped in the open-source Grafana stack — traces, metrics, logs and continuous profiling — with a security-gated CI pipeline in every service repository.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">Timeline</span><span class="meta-value">2026 · still in progress</span></div>
+      <div class="meta-item"><span class="meta-label">Context</span><span class="meta-value">Personal project</span></div>
+      <div class="meta-item"><span class="meta-label">Based on</span><span class="meta-value">Google Online Boutique (Apache 2.0)</span></div>
+      <div class="meta-item"><span class="meta-label">Environment</span><span class="meta-value">Docker Compose · local machine</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Grafana Alloy</span><span class="tag">Mimir</span><span class="tag">Loki</span><span class="tag">Tempo</span>
+      <span class="tag">Pyroscope</span><span class="tag">OpenTelemetry</span><span class="tag">Go</span><span class="tag">C#</span>
+      <span class="tag">TypeScript</span><span class="tag">Java</span><span class="tag">Python</span><span class="tag">PostgreSQL</span>
+      <span class="tag">GitHub Actions</span><span class="tag">Trivy</span><span class="tag">Cosign</span><span class="tag">Semgrep</span>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-number">10</span><span class="stat-label">Microservices in five languages — Go, C#, TypeScript, Java and Python</span></div>
+    <div class="stat-card"><span class="stat-number">4</span><span class="stat-label">Telemetry signals — traces, metrics, logs and continuous profiles</span></div>
+    <div class="stat-card"><span class="stat-number">10</span><span class="stat-label">Provisioned Grafana dashboards, one per service, 243 panels in total</span></div>
+    <div class="stat-card"><span class="stat-number">9</span><span class="stat-label">CI stages per service, from lint to a signed image with an SBOM</span></div>
+  </div>
+
+  <section class="section">
+    <p class="section-eyebrow">01 — Context</p>
+    <h2>A realistic target for the open-source stack</h2>
+    <p>Most of my production observability work has been in Datadog and Splunk. I wanted hands-on time with the open-source counterpart — the Grafana LGTM stack plus Pyroscope — and for that I needed an application with enough moving parts to be worth observing: several services, several languages, a database, gRPC between services, and a real request path through a storefront.</p>
+    <p>Google's <a class="inline" href="https://github.com/GoogleCloudPlatform/microservices-demo" target="_blank">Online Boutique</a> fits that, and it is Apache 2.0 licensed. The service split, the gRPC contracts and the overall behaviour follow the original. What I built around it is the observability stack, the instrumentation wiring, the delivery pipeline for each service, and a few changes to how the services themselves work (section 03). The project is not finished — section 06 lists what is missing.</p>
+    <div class="callout blue">
+      <p class="callout-label">What is mine and what is Google's</p>
+      <p>The storefront idea and the service architecture come from Online Boutique. The Grafana stack configuration, the per-service telemetry setup, the dashboards, the Postgres-backed catalog and the CI pipelines are my work. I'd rather say that plainly than have it read as an application I designed from scratch — Reflective is the project where I did that.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">02 — Architecture</p>
+    <h2>What is running</h2>
+    <p>Everything starts from one Docker Compose file in the <a class="inline" href="https://github.com/mladenovskistefan111/platform-demo-observability" target="_blank">platform-demo-observability</a> repository. The application images are pulled from Docker Hub by digest — the ones built and signed by the service pipelines.</p>
+    <h3>Observability stack</h3>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>What it does</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Grafana Alloy</td><td>The collector for traces, metrics and logs. Receives OTLP traces and metrics, scrapes each service's metrics endpoint every 15 seconds, and reads container logs through the Docker socket</td><td>Containers get a service_name label at discovery time, which is what ties logs to the same service name used by traces and metrics</td></tr>
+        <tr><td>Mimir</td><td>Metrics storage, Prometheus-compatible</td><td>Receives remote_write from Alloy and from Tempo's metrics generator</td></tr>
+        <tr><td>Loki</td><td>Log storage</td><td>Fed by Alloy from every container's stdout</td></tr>
+        <tr><td>Tempo</td><td>Trace storage, plus service graphs and span metrics generated from the traces</td><td>Generated metrics are written to Mimir with exemplars, so a metric panel can link to a trace</td></tr>
+        <tr><td>Pyroscope</td><td>Continuous profiling</td><td>Services push profiles directly through the SDK, so there is nothing to scrape</td></tr>
+        <tr><td>Grafana</td><td>Visualisation. Datasources and all ten dashboards are provisioned from files</td><td>Tempo is linked to Loki for trace-to-logs and to Mimir for the service map</td></tr>
+      </tbody>
+    </table>
+    <h3>Application services</h3>
+    <table class="tech-table">
+      <thead><tr><th>Service</th><th>Language</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://github.com/mladenovskistefan111/frontend" target="_blank">frontend</a></td><td>Go</td><td>The storefront. Calls every other service over gRPC</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/checkout-service" target="_blank">checkout-service</a></td><td>Go</td><td>Orchestrates an order across cart, catalog, currency, shipping, payment and email</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/product-catalog-service" target="_blank">product-catalog-service</a></td><td>Go</td><td>Product list, lookup and search, backed by PostgreSQL (<a href="https://github.com/mladenovskistefan111/product-catalog-db" target="_blank">product-catalog-db</a>)</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/shipping-service" target="_blank">shipping-service</a></td><td>Go</td><td>Shipping quotes and tracking IDs</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/cart-service" target="_blank">cart-service</a></td><td>C#</td><td>Shopping cart, stored in Redis</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/currency-service" target="_blank">currency-service</a></td><td>TypeScript</td><td>Currency conversion</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/payment-service" target="_blank">payment-service</a></td><td>TypeScript</td><td>Mock card charging</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/ad-service" target="_blank">ad-service</a></td><td>Java</td><td>Context-based ads</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/recommendation-service" target="_blank">recommendation-service</a></td><td>Python</td><td>Product recommendations</td></tr>
+        <tr><td><a href="https://github.com/mladenovskistefan111/email-service" target="_blank">email-service</a></td><td>Python</td><td>Order confirmation emails</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">03 — What I changed</p>
+    <h2>Beyond wiring up the telemetry</h2>
+    <div class="highlight-row">
+      <div class="highlight-item"><div class="highlight-item-title">Postgres-backed product catalog</div><div class="highlight-item-desc">The upstream catalog is served from a JSON file. Here it lives in PostgreSQL, loaded through a pgx connection pool. A single query loads the whole catalog into memory, and the service only goes back to the database on a SIGUSR1 reload signal or when its cache is empty — so a request never costs a query.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">Parallel fetching on the home page</div><div class="highlight-item-desc">Rather than calling downstream services one after another, the frontend's home handler now fetches currencies, products and the cart concurrently, and converts each product's price in its own goroutine.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">One telemetry shape across five languages</div><div class="highlight-item-desc">Every service sets its own name as OTEL_SERVICE_NAME, exports traces to Alloy and, in nine of ten, pushes profiles to Pyroscope, using the SDK for its language. That consistency is what lets one dashboard layout and one set of Alloy rules cover Go, C#, TypeScript, Java and Python.</div></div>
+      <div class="highlight-item"><div class="highlight-item-title">A pipeline per service</div><div class="highlight-item-desc">Every service repository carries its own CI workflow. The tools differ per language — golangci-lint, ruff, dotnet format, govulncheck, npm audit, pip-audit — but the stages and the gates are the same.</div></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">04 — The observability pipeline</p>
+    <h2>How the four signals flow</h2>
+    <p><strong>Traces.</strong> Services export OTLP to Alloy, which forwards to Tempo. Tempo's metrics generator turns the spans into service-graph and span metrics and writes them to Mimir, so the service map and the request-rate and latency panels are built from the traces rather than from separate instrumentation.</p>
+    <p><strong>Metrics.</strong> Alloy scrapes the Prometheus endpoint every service exposes and also receives OTLP metrics, converting them to Prometheus format on the way into Mimir.</p>
+    <p><strong>Logs.</strong> Alloy discovers containers through the Docker socket, labels each stream with the container name as service_name, and ships it to Loki. Grafana's Tempo datasource is configured to jump from a span to the matching logs.</p>
+    <p><strong>Profiles.</strong> Nine of the ten services push profiles to Pyroscope directly, through the SDK, without passing through Alloy.</p>
+    <div class="callout amber">
+      <p class="callout-label">A configuration trap</p>
+      <p>Configuring Tempo's metrics generator is not enough to get service graphs and span metrics. The processors also have to be enabled under the overrides section, otherwise the generator ring stays empty and nothing is produced — and nothing reports an error either. There is a comment in the Tempo config marking exactly that line.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">05 — Secure delivery</p>
+    <h2>The pipeline each service goes through</h2>
+    <table class="tech-table">
+      <thead><tr><th>Stage</th><th>What it does</th><th>Tools</th></tr></thead>
+      <tbody>
+        <tr><td>Lint &amp; format</td><td>Fails on style and static-analysis findings</td><td>golangci-lint, ruff, dotnet format</td></tr>
+        <tr><td>Secret scan</td><td>Scans the repository for committed credentials</td><td>Gitleaks</td></tr>
+        <tr><td>Build &amp; unit tests</td><td>Compiles the service and runs its tests</td><td>Language-native tooling</td></tr>
+        <tr><td>Dependency scan</td><td>Checks libraries for known vulnerabilities</td><td>govulncheck, npm audit, pip-audit, dotnet list --vulnerable</td></tr>
+        <tr><td>Static analysis</td><td>Looks for insecure code patterns</td><td>Semgrep, gosec</td></tr>
+        <tr><td>Stage image</td><td>Builds the image and pushes it to a staging registry</td><td>Docker Buildx, ghcr.io</td></tr>
+        <tr><td>Image gate</td><td>Scans the staged image and fails the pipeline on any critical or high CVE</td><td>Trivy</td></tr>
+        <tr><td>Publish &amp; sign</td><td>Pushes to Docker Hub, signs the image and attaches an SBOM to it</td><td>Cosign, Anchore SBOM (SPDX)</td></tr>
+        <tr><td>Post-publish tests</td><td>Depending on the service: end-to-end or integration tests on a throwaway kind cluster, or a server started from source and probed over gRPC</td><td>kind, grpcurl, hey</td></tr>
+      </tbody>
+    </table>
+    <p>The Trivy gate sits before publishing, so an image with a critical or high CVE never reaches Docker Hub, and every image that does is signed with an SBOM attached.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">06 — Honest gaps</p>
+    <h2>What this project is not, yet</h2>
+    <div class="callout amber">
+      <p class="callout-label">Known gaps</p>
+      <ul>
+        <li><strong>It runs on Docker Compose, not Kubernetes.</strong> There is no GitOps and no deployment automation behind the pipelines; they stop at a signed image.</li>
+        <li><strong>CI is started by hand in nine of ten repositories.</strong> The push triggers are commented out. Only product-catalog-service runs on push to main.</li>
+        <li><strong>Test coverage after publishing is uneven.</strong> Seven services get a post-publish test stage; ad, recommendation and email do not. For payment, currency and shipping that stage is a single gRPC health check, and the frontend's "load test" sends 1,000 requests to its health endpoint — a regression gate, not a realistic load profile.</li>
+        <li><strong>One service is not profiled.</strong> The C# cart service does not send profiles to Pyroscope.</li>
+        <li><strong>A dead scrape target.</strong> Alloy is configured to scrape a PostgreSQL exporter, but the exporter is not in the Compose file and no dashboard uses it, so there is no database dashboard.</li>
+        <li><strong>No alerting.</strong> There are dashboards but no alert rules and no SLOs, which is the part of observability I do day to day at work.</li>
+        <li><strong>Demo-grade hardening.</strong> Grafana runs with anonymous admin access, the database credentials are throwaway, most stack images are on :latest, and some GitHub Actions are referenced by tag or branch rather than pinned to a commit.</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section">
+    <p class="section-eyebrow">07 — Reflection</p>
+    <h2>What it was for</h2>
+    <p>Reflective taught me to instrument one application from the inside. This project is the other direction: take a set of services I did not design, in languages I use less often, and make them observable and shippable in a uniform way. Most of the work was in the seams — making five languages emit the same kind of telemetry, and making one pipeline shape fit five build systems.</p>
+    <div class="callout green">
+      <p class="callout-label">What comes next</p>
+      <p>Moving it onto Kubernetes with Helm and ArgoCD, so the signed images are actually deployed by the platform. After that, alert rules and SLOs on top of the dashboards, push-triggered pipelines, and linking Pyroscope profiles to Tempo traces.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a class="footer-link" href="index.html">← Portfolio</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/platform-demo-observability" target="_blank">Observability Stack Repo</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/frontend" target="_blank">Frontend Repo</a>
+      <a class="footer-link" href="https://github.com/mladenovskistefan111/product-catalog-service" target="_blank">Catalog Service Repo</a>
+      <a class="footer-link" href="https://www.linkedin.com/in/stefan-m-8727b6205/" target="_blank">LinkedIn</a>
+    </div>
+    <p class="footer-note">Stefan Mladenovski — DevOps &amp; Platform Engineer — Skopje, N. Macedonia</p>
+  </footer>
+</div>
+</body>
+</html>
